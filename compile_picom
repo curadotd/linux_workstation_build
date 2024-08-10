@@ -3,18 +3,34 @@
 # Ask user if they want to use picom files
 read -p "Do you want to install picom? (y/n) " install_picom
 
+# Ask user to create a default git location
+read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
+if [[ $create_git_dir =~ ^[Yy]$ ]]; then
+    read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+    git_path=${git_path:-$HOME/git}
+    
+    if [ ! -d "$git_path" ]; then
+        mkdir -p "$git_path"
+        echo "Created git directory at $git_path"
+    else
+        echo "Git directory already exists at $git_path"
+    fi
+    
+    # Export the git path to use later in the script
+    export GIT_PATH="$git_path"
+else
+    echo "Skipping git directory creation."
+fi
+
 if [[ $install_picom =~ ^[Yy]$ ]]; then
     echo "Installing picom..."
 
     # Check if picom exists
     if ! command -v picom &> /dev/null; then
-        read -p "picom is not installed. Would you like to compile it? (y/n): " compile_picom
-        if [ "$compile_picom" = "y" ]; then
-            # Clone the repository in the home/git directory
-            if [ ! -d $git_path/picom ]; then
-                if ! git clone https://github.com/FT-Labs/picom.git $git_path/picom; then
-                    echo "Failed to clone the repository"
-                    return 1
+        if [ ! -d $git_path/picom ]; then
+            if ! git clone https://github.com/FT-Labs/picom.git $git_path/picom; then
+                echo "Failed to clone the repository"
+                return 1
                 fi
             else
                 echo "Repository already exists, skipping clone"
@@ -49,7 +65,6 @@ if [[ $install_picom =~ ^[Yy]$ ]]; then
     else
         echo "picom is already installed"
     fi
-
 else
     echo "Skipping picom install."
 fi
