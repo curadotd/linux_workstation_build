@@ -86,11 +86,11 @@ else
     echo "Skipping dwm-curado installation and setup."
 fi
 
-$git_path/compile_picom
+$git_path/linux_workstation_build/compile_picom
 
-$git_path/install_starship
+$git_path/linux_workstation_build/install_starship
 
-$git_path/install_mattermost_desktop
+$git_path/linux_workstation_build/install_mattermost_desktop
 
 # Ask user if they want to use dotconfig files
 read -p "Do you want to use the dotconfig files? (y/n) " use_dotconfig
@@ -125,11 +125,11 @@ if [[ $use_dotconfig =~ ^[Yy]$ ]]; then
 else
     echo "Skipping dotconfig setup."
 
-$git_path/install_tokyo_nights_theme
+$git_path/linux_workstation_build/install_tokyo_nights_theme
 
-$git_path/install_web_browser
+$git_path/linux_workstation_build/install_web_browser
 
-$git_path/install_pcoip_client
+$git_path/linux_workstation_build/install_pcoip_client
 
 # Ask user if they want to install Steam
 read -p "Do you want to install Steam? (y/n): " steam_answer
@@ -160,6 +160,6 @@ fi
 
 echo "All installations completed."
 
-$git_path/install_obs_studio
+$git_path/linux_workstation_build/install_obs_studio
 
 echo "Setup is now completed, please reboot your system."
