@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "Do you want to install OBS Studio? (y/n)"
+read -r response
+
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    echo "Installing OBS Studio..."
+    sudo apt update
+    sudo apt install -y obs-studio
+    echo "OBS Studio installation complete."
+else
+    echo "OBS Studio installation skipped."
+fi
