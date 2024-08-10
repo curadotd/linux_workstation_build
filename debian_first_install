@@ -3,6 +3,30 @@
 # Install development tools and other necessary packages
 sudo apt install build-essential dkms linux-headers-amd64 libgl1-mesa-dev pkg-config
 
+# Ask user if they want to install graphics drivers
+read -p "Do you want to install graphics drivers? (y/n) " install_drivers
+
+if [[ $install_drivers =~ ^[Yy]$ ]]; then
+    # Check for NVIDIA GPU
+    if lspci | grep -i nvidia > /dev/null; then
+        echo "NVIDIA GPU detected. Installing NVIDIA drivers..."
+        sudo apt install nvidia-driver firmware-misc-nonfree
+        sudo dpkg --add-architecture i386 && sudo apt update
+        sudo apt install nvidia-driver-libs nvidia-driver-libs:i386
+        sudo apt install nvidia-cuda-dev nvidia-cuda-toolkit
+    elif lspci | grep -i amd > /dev/null; then
+        echo "AMD GPU detected. Installing AMD drivers..."
+        sudo apt install firmware-amd-graphics libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers xserver-xorg-video-all
+    elif lspci | grep -i intel > /dev/null; then
+        echo "Intel GPU detected. Installing Intel drivers..."
+        sudo apt install xserver-xorg-video-intel
+    else
+        echo "No supported GPU detected. Please check your hardware."
+    fi
+else
+    echo "Skipping graphics driver installation."
+fi
+
 
 # Ask if the user wants to use Debian Sid (unstable)
 read -p "Do you want to use Debian Sid (unstable)? This is not recommended for production systems. (y/n): " sid_choice

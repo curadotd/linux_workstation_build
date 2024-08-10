@@ -2,30 +2,6 @@
 
 current_dir=$(pwd)
 
-# Ask user if they want to install graphics drivers
-read -p "Do you want to install graphics drivers? (y/n) " install_drivers
-
-if [[ $install_drivers =~ ^[Yy]$ ]]; then
-    # Check for NVIDIA GPU
-    if lspci | grep -i nvidia > /dev/null; then
-        echo "NVIDIA GPU detected. Installing NVIDIA drivers..."
-        sudo apt install nvidia-driver firmware-misc-nonfree
-        sudo dpkg --add-architecture i386 && sudo apt update
-        sudo apt install nvidia-driver-libs nvidia-driver-libs:i386
-        sudo apt install nvidia-cuda-dev nvidia-cuda-toolkit
-    elif lspci | grep -i amd > /dev/null; then
-        echo "AMD GPU detected. Installing AMD drivers..."
-        sudo apt install firmware-amd-graphics libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers xserver-xorg-video-all
-    elif lspci | grep -i intel > /dev/null; then
-        echo "Intel GPU detected. Installing Intel drivers..."
-        sudo apt install xserver-xorg-video-intel
-    else
-        echo "No supported GPU detected. Please check your hardware."
-    fi
-else
-    echo "Skipping graphics driver installation."
-fi
-
 echo Install base libraries
 sudo apt install libconfig-dev libdbus-1-dev libegl-dev libgl-dev libepoxy-dev libpcre2-dev libpixman-1-dev libx11-xcb-dev libxcb1-dev \
 libxcb-composite0-dev libxcb-damage0-dev libxcb-dpms0-dev libxcb-glx0-dev libxcb-image0-dev libxcb-randr0-dev libxcb-render0-dev \
