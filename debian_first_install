@@ -41,7 +41,7 @@ if [[ "$sid_choice" == "y" ]]; then
     echo "deb-src http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
     sudo apt update
     # Perform full system upgrade
-    sudo apt full-upgrade
+    sudo apt upgrade
     echo "System upgraded to Debian Sid."
 else
     echo "Continuing with the current Debian version."
