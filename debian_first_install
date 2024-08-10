@@ -1,19 +1,5 @@
 #!/bin/bash
 
-# Check for updates
-if sudo apt-get update; then
-    read -p "Updates are available. Do you want to update the system now? (y/n): " choice
-    if [[ "$choice" == "y" ]]; then
-        echo "Please update your system with 'sudo apt-get upgrade' and reboot."
-        exit 0
-    else
-        echo "Skipping updates. Continuing with the script..."
-    fi
-else
-    echo "Failed to check for updates. Please check your internet connection."
-    exit 1
-fi
-
 # Ask if the user wants to use Debian Sid (unstable)
 read -p "Do you want to use Debian Sid (unstable)? This is not recommended for production systems. (y/n): " sid_choice
 if [[ "$sid_choice" == "y" ]]; then
@@ -25,7 +11,7 @@ if [[ "$sid_choice" == "y" ]]; then
     echo "# Debian Sid repositories" | sudo tee -a /etc/apt/sources.list
     echo "deb http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
     echo "deb-src http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
-    apt-get update
+    sudo apt update
     # Perform full system upgrade
     sudo apt full-upgrade -y
     echo "System upgraded to Debian Sid."
@@ -34,10 +20,10 @@ else
 fi
 
 # Install development tools and other necessary packages
-apt-get install -y build-essential dkms linux-headers-$(uname -r)
+sudo apt install -y build-essential dkms linux-headers-$(uname -r)
 
 # Install additional packages (equivalent to some RPM Fusion packages)
-apt-get install -y libgl1-mesa-dev pkg-config
+sudo apt install -y libgl1-mesa-dev pkg-config
 
 # Clean up
 sudo apt autoremove -y
