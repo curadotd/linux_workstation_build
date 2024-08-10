@@ -160,6 +160,7 @@ read -p "Do you want to install and enable LightDM greeter? (y/n) " install_ligh
 if [[ $install_lightdm =~ ^[Yy]$ ]]; then
     echo "Installing LightDM and LightDM GTK greeter..."
     sudo apt install -y lightdm lightdm-gtk-greeter
+    sudo dpkg-reconfigure lightdm
     sudo systemctl enable lightdm
     echo "LightDM has been installed and enabled."
 else

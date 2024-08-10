@@ -20,7 +20,7 @@ else
 fi
 
 # Install development tools and other necessary packages
-sudo apt install -y build-essential dkms linux-headers-$(uname -r)
+sudo apt install -y build-essential dkms linux-headers-amd64
 
 # Install additional packages (equivalent to some RPM Fusion packages)
 sudo apt install -y libgl1-mesa-dev pkg-config
