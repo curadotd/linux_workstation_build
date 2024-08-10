@@ -1,5 +1,7 @@
 #!/bin/bash
 
+current_dir=$(pwd)
+
 # Ask user if they want to use picom files
 read -p "Do you want to install picom? (y/n) " install_picom
 
@@ -59,12 +61,16 @@ if [[ $install_picom =~ ^[Yy]$ ]]; then
                 return 1
             fi
             echo "Picom animations installed successfully"
+            cd $current_dir
         else
             echo "Skipping picom compilation"
+            cd $current_dir
         fi
     else
         echo "picom is already installed"
+        cd $current_dir
     fi
 else
     echo "Skipping picom install."
+    cd $current_dir
 fi

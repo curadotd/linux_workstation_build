@@ -1,5 +1,7 @@
 #! /bin/bash
 
+current_dir=$(pwd)
+
 # Ask user if they want to install graphics drivers
 read -p "Do you want to install graphics drivers? (y/n) " install_drivers
 
@@ -64,6 +66,7 @@ if [[ $install_dwm_curado =~ ^[Yy]$ ]]; then
     git clone https://github.com/curadotd/dwm-curado.git $git_path/dwm-curado
     cd $git_path/dwm-curado
     sudo make clean install
+    cd $current_dir
     # Add any additional configuration steps
 else
     echo "Skipping dwm-curado installation and setup."
@@ -81,6 +84,7 @@ if [[ $install_slstatus_curado =~ ^[Yy]$ ]]; then
     git clone https://github.com/curadotd/slstatus-curado.git $git_path/slstatus-curado
     cd $git_path/slstatus-curado
     sudo make clean install
+    cd $current_dir
     # Add any additional configuration steps
 else
     echo "Skipping dwm-curado installation and setup."
@@ -118,12 +122,15 @@ if [[ $use_dotconfig =~ ^[Yy]$ ]]; then
     cp -R user-dirs.dirs $HOME/.config/
     cp -R user-dirs.locale $HOME/.config/
 
+    cd $current_dir
+
     # You may want to add additional steps here, such as:
     # - Moving files from .config/dotconfig to .config
     # - Removing the temporary dotconfig folder
     # - Setting up symlinks if necessary
 else
     echo "Skipping dotconfig setup."
+    cd $current_dir
 fi
 
 $git_path/linux_workstation_build/install_tokyo_nights_theme
