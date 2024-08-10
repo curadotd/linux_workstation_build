@@ -160,4 +160,6 @@ fi
 
 echo "All installations completed."
 
+$git_path/install_obs_studio
+
 echo "Setup is now completed, please reboot your system."
