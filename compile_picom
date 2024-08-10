@@ -1,24 +1,5 @@
 #!/bin/bash
 
-# Ask user to create a default git location
-read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
-if [[ $create_git_dir =~ ^[Yy]$ ]]; then
-    read -p "Enter the path for git repositories (default: $HOME/git): " git_path
-    git_path=${git_path:-$HOME/git}
-    
-    if [ ! -d "$git_path" ]; then
-        mkdir -p "$git_path"
-        echo "Created git directory at $git_path"
-    else
-        echo "Git directory already exists at $git_path"
-    fi
-    
-    # Export the git path to use later in the script
-    export GIT_PATH="$git_path"
-else
-    echo "Skipping git directory creation."
-fi
-
 # Ask user if they want to use picom files
 read -p "Do you want to install picom? (y/n) " install_picom
 
@@ -71,3 +52,4 @@ if [[ $install_picom =~ ^[Yy]$ ]]; then
 
 else
     echo "Skipping picom install."
+fi

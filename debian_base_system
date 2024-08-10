@@ -58,7 +58,7 @@ read -p "Do you want to install and setup dwm-curado, a fork of dwm-titus? (y/n)
 if [[ $install_dwm_curado =~ ^[Yy]$ ]]; then
     echo "Installing and setting up dwm-curado..."
     echo "Installing dependencies"
-    sudo apt install libx11-dev libxft-dev libimlib2-dev libxinerama-dev libxcb-res0-dev kitty feh mate-polkit flameshot dunst x11-xcb
+    sudo apt install libx11-dev libxft-dev libimlib2-dev libxinerama-dev libxcb-res0-dev kitty feh mate-polkit flameshot dunst
     # Add installation and setup commands for dwm-curado here
     # For example:
     git clone https://github.com/curadotd/dwm-curado.git $git_path/dwm-curado
@@ -124,6 +124,7 @@ if [[ $use_dotconfig =~ ^[Yy]$ ]]; then
     # - Setting up symlinks if necessary
 else
     echo "Skipping dotconfig setup."
+fi
 
 $git_path/linux_workstation_build/install_tokyo_nights_theme
 
