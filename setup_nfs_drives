@@ -10,13 +10,13 @@ install_nfs() {
     elif command -v dnf &> /dev/null; then
         # Rocky Linux
         if ! dnf list installed nfs-utils &> /dev/null; then
-            sudo dnf install -y nfs-utils
+            sudo dnf install nfs-utils
         fi
     elif command -v apt &> /dev/null; then
         # Debian-based
         if ! dpkg -l | grep -q nfs-common; then
             sudo apt update
-            sudo apt install -y nfs-common
+            sudo apt install nfs-common
         fi
     else
         echo "Unsupported package manager. Please install NFS manually."

@@ -67,12 +67,12 @@ install_fonts_manual() {
 }
 
 install_fonts_rocky() {
-    sudo dnf install -y fontawesome-fonts
+    sudo dnf install fontawesome-fonts
 }
 
 install_fonts_debian() {
     sudo apt update
-    sudo apt install -y fonts-font-awesome
+    sudo apt install fonts-font-awesome
 }
 
 read -p "Do you want to install fonts? (y/n): " install_fonts

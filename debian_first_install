@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Install development tools and other necessary packages
+sudo apt install build-essential dkms linux-headers-amd64 libgl1-mesa-dev pkg-config
+
+
 # Ask if the user wants to use Debian Sid (unstable)
 read -p "Do you want to use Debian Sid (unstable)? This is not recommended for production systems. (y/n): " sid_choice
 if [[ "$sid_choice" == "y" ]]; then
@@ -13,20 +17,14 @@ if [[ "$sid_choice" == "y" ]]; then
     echo "deb-src http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
     sudo apt update
     # Perform full system upgrade
-    sudo apt full-upgrade -y
+    sudo apt full-upgrade
     echo "System upgraded to Debian Sid."
 else
     echo "Continuing with the current Debian version."
 fi
 
-# Install development tools and other necessary packages
-sudo apt install -y build-essential dkms linux-headers-amd64
-
-# Install additional packages (equivalent to some RPM Fusion packages)
-sudo apt install -y libgl1-mesa-dev pkg-config
-
 # Clean up
-sudo apt autoremove -y
+sudo apt autoremove
 sudo apt autoclean
 
 read -p "Do you want to reboot the system now? (y/n): " reboot_choice

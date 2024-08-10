@@ -9,16 +9,16 @@ if [[ $install_drivers =~ ^[Yy]$ ]]; then
     # Check for NVIDIA GPU
     if lspci | grep -i nvidia > /dev/null; then
         echo "NVIDIA GPU detected. Installing NVIDIA drivers..."
-        sudo apt install -y nvidia-driver firmware-misc-nonfree
+        sudo apt install nvidia-driver firmware-misc-nonfree
         sudo dpkg --add-architecture i386 && sudo apt update
-        sudo apt install -y nvidia-driver-libs nvidia-driver-libs:i386
-        sudo apt install -y nvidia-cuda-dev nvidia-cuda-toolkit
+        sudo apt install nvidia-driver-libs nvidia-driver-libs:i386
+        sudo apt install nvidia-cuda-dev nvidia-cuda-toolkit
     elif lspci | grep -i amd > /dev/null; then
         echo "AMD GPU detected. Installing AMD drivers..."
-        sudo apt install -y firmware-amd-graphics libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers xserver-xorg-video-all
+        sudo apt install firmware-amd-graphics libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers xserver-xorg-video-all
     elif lspci | grep -i intel > /dev/null; then
         echo "Intel GPU detected. Installing Intel drivers..."
-        sudo apt install -y xserver-xorg-video-intel
+        sudo apt install xserver-xorg-video-intel
     else
         echo "No supported GPU detected. Please check your hardware."
     fi
@@ -159,7 +159,7 @@ read -p "Do you want to install and enable LightDM greeter? (y/n) " install_ligh
 
 if [[ $install_lightdm =~ ^[Yy]$ ]]; then
     echo "Installing LightDM and LightDM GTK greeter..."
-    sudo apt install -y lightdm lightdm-gtk-greeter
+    sudo apt install lightdm lightdm-gtk-greeter
     sudo dpkg-reconfigure lightdm
     sudo systemctl enable lightdm
     echo "LightDM has been installed and enabled."

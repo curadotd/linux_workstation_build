@@ -6,7 +6,7 @@ read -r response
 if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
     echo "Installing OBS Studio..."
     sudo apt update
-    sudo apt install -y obs-studio ffmpeg
+    sudo apt install obs-studio ffmpeg
     echo "OBS Studio installation complete."
 else
     echo "OBS Studio installation skipped."

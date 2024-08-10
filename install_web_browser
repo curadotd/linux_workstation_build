@@ -28,7 +28,7 @@ case $browser_choice in
         ;;
     3)
         echo "Installing Firefox..."
-        sudo apt install -y firefox-esr
+        sudo apt install firefox-esr
         ;;
     4)
         echo "Skipping browser installation."

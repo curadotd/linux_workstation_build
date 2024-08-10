@@ -7,7 +7,7 @@ if [[ $install_starship =~ ^[Yy]$ ]]; then
     # Check if starship is installed
     if ! command -v starship &> /dev/null; then
         echo "Installing Starship..."
-        sudo apt install -y curl
+        sudo apt install curl
         curl -sS https://starship.rs/install.sh | sh
     else
         echo "Starship is already installed."
