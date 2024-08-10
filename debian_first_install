@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Check if the user has sudo privileges
+if ! sudo -v &> /dev/null; then
+    echo "You don't have sudo privileges. Attempting to add you to the sudo group..."
+    su -c "usermod -aG sudo $USER"
+    echo "You have been added to the sudo group. Please log out and log back in for the changes to take effect."
+    echo "After logging back in, run this script again."
+    exit 0
+fi
+
+# Check for updates
+if apt-get update; then
+    read -p "Updates are available. Do you want to update the system now? (y/n): " choice
+    if [[ "$choice" == "y" ]]; then
+        echo "Please update your system with 'sudo apt-get upgrade' and reboot."
+        exit 0
+    else
+        echo "Skipping updates. Continuing with the script..."
+    fi
+else
+    echo "Failed to check for updates. Please check your internet connection."
+    exit 1
+fi
+
+# Ask if the user wants to use Debian Sid (unstable)
+read -p "Do you want to use Debian Sid (unstable)? This is not recommended for production systems. (y/n): " sid_choice
+if [[ "$sid_choice" == "y" ]]; then
+    echo "Switching to Debian Sid..."
+    # Comment out existing entries in sources.list
+    sudo sed -i 's/^/#/' /etc/apt/sources.list
+
+    # Add Debian Sid repositories
+    echo "# Debian Sid repositories" | sudo tee -a /etc/apt/sources.list
+    echo "deb http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
+    echo "deb-src http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
+    apt-get update
+    # Perform full system upgrade
+    sudo apt full-upgrade -y
+    echo "System upgraded to Debian Sid."
+else
+    echo "Continuing with the current Debian version."
+fi
+
+# Install development tools and other necessary packages
+apt-get install -y build-essential dkms linux-headers-$(uname -r)
+
+# Install additional packages (equivalent to some RPM Fusion packages)
+apt-get install -y libgl1-mesa-dev pkg-config
+
+# Clean up
+sudo apt autoremove -y
+sudo apt autoclean
+
+read -p "Do you want to reboot the system now? (y/n): " reboot_choice
+if [[ "$reboot_choice" == "y" ]]; then
+    echo "Rebooting the system..."
+    sudo reboot
+else
+    echo "Reboot skipped. Please reboot manually later."
+fi

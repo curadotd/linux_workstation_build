@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# Ask user if they want to install pciop-client
+read -p "Do you want to install pciop-client, if you need it for remote work? (y/n) " install_pciop
+
+if [[ $install_pciop =~ ^[Yy]$ ]]; then
+    echo "Installing pciop-client..."
+    # Function to install the latest pcoip-client for Arch Linux
+    install_arch() {
+        if ! command -v yay &> /dev/null; then
+            sudo pacman -S --needed base-devel git
+            if [ ! -d "$HOME/git" ]; then
+                mkdir "$HOME/git"
+            fi
+            git clone https://aur.archlinux.org/yay.git
+            cd yay
+            makepkg -si
+            cd ..
+        fi
+        if ! pacman -Qi pcoip-client &> /dev/null; then
+            yay -S pcoip-client
+        else
+            echo "pcoip-client is already installed"
+        fi
+    }
+
+    # Function to install the latest pcoip-client for Rocky Linux
+    install_rocky() {
+        if ! rpm -q pcoip-client; then
+            curl -1sLf https://dl.anyware.hp.com/xHfmOLEc9bWcllgT/pcoip-agent/cfg/setup/bash.rpm.sh | sudo -E distro=el codename=9 bash
+        else
+            echo "pcoip-client is already installed on Rocky Linux"
+        fi
+    }
+
+    # Function to install the latest pcoip-client for Debian
+    install_debian() {
+        if ! dpkg -l | grep -q pcoip-client; then
+            curl -1sLf https://dl.anyware.hp.com/DeAdBCiUYInHcSTy/pcoip-client/cfg/setup/bash.deb.sh | sudo -E distro=ubuntu codename=jammy bash
+            sudo apt update
+            cd ~/Downloads
+            wget https://ftp.debian.org/debian/pool/main/p/protobuf/libprotobuf23_3.12.4-1+deb11u1_amd64.deb
+            sudo apt install ./libprotobuf23_3.12.4-1+deb11u1_amd64.deb
+            rm libprotobuf23_3.12.4-1+deb11u1_amd64.deb
+            cd "$current_dir" 
+            sudo apt install -y pciop-client
+            echo "pciop-client has been installed successfully."
+        else
+            echo "pcoip-client is already installed on Debian"
+        fi
+    }
+
+    # Detect the distribution and call the appropriate function
+    if [ -f /etc/arch-release ]; then
+        install_arch
+    elif [ -f /etc/rocky-release ]; then
+        install_rocky
+    elif [ -f /etc/debian_version ]; then
+        install_debian
+    else
+        echo "Unsupported distribution"
+    fi
+    
+else
+    echo "Skipping pciop-client installation."
+fi

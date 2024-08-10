@@ -1,0 +1,163 @@
+#! /bin/bash
+
+# Ask user if they want to install graphics drivers
+read -p "Do you want to install graphics drivers? (y/n) " install_drivers
+
+if [[ $install_drivers =~ ^[Yy]$ ]]; then
+    # Check for NVIDIA GPU
+    if lspci | grep -i nvidia > /dev/null; then
+        echo "NVIDIA GPU detected. Installing NVIDIA drivers..."
+        sudo apt install -y nvidia-driver firmware-misc-nonfree
+        sudo dpkg --add-architecture i386 && sudo apt update
+        sudo apt install -y nvidia-driver-libs nvidia-driver-libs:i386
+        sudo apt install -y nvidia-cuda-dev nvidia-cuda-toolkit
+    elif lspci | grep -i amd > /dev/null; then
+        echo "AMD GPU detected. Installing AMD drivers..."
+        sudo apt install -y firmware-amd-graphics libgl1-mesa-dri libglx-mesa0 mesa-vulkan-drivers xserver-xorg-video-all
+    elif lspci | grep -i intel > /dev/null; then
+        echo "Intel GPU detected. Installing Intel drivers..."
+        sudo apt install -y xserver-xorg-video-intel
+    else
+        echo "No supported GPU detected. Please check your hardware."
+    fi
+else
+    echo "Skipping graphics driver installation."
+fi
+
+echo Install base libraries
+sudo apt install libconfig-dev libdbus-1-dev libegl-dev libgl-dev libepoxy-dev libpcre2-dev libpixman-1-dev libx11-xcb-dev libxcb1-dev \
+libxcb-composite0-dev libxcb-damage0-dev libxcb-dpms0-dev libxcb-glx0-dev libxcb-image0-dev libxcb-randr0-dev libxcb-render0-dev \
+libxcb-render-util0-dev libxcb-shape0-dev libxcb-util-dev libxcb-xfixes0-dev libxext-dev meson ninja-build uthash-dev cmake \
+build-essential tar tree multitail tldr trash-cli unzip cmake make jq lxappearance papirus-icon-theme fonts-noto-color-emoji \
+starship lm-sensors thunar x11-xserver-utils pipewire wireplumber pavucontrol xdg-utils xinput rofi wget gh
+
+$git_path/install_fonts
+
+# Ask user to create a default git location
+read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
+if [[ $create_git_dir =~ ^[Yy]$ ]]; then
+    read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+    git_path=${git_path:-$HOME/git}
+    
+    if [ ! -d "$git_path" ]; then
+        mkdir -p "$git_path"
+        echo "Created git directory at $git_path"
+    else
+        echo "Git directory already exists at $git_path"
+    fi
+    
+    # Export the git path to use later in the script
+    export GIT_PATH="$git_path"
+else
+    echo "Skipping git directory creation."
+fi
+
+# Ask user if they want to install and setup dwm-curado
+read -p "Do you want to install and setup dwm-curado, a fork of dwm-titus? (y/n) " install_dwm_curado
+
+if [[ $install_dwm_curado =~ ^[Yy]$ ]]; then
+    echo "Installing and setting up dwm-curado..."
+    echo "Installing dependencies"
+    sudo apt install libx11-dev libxft-dev libimlib2-dev libxinerama-dev libxcb-res0-dev kitty feh mate-polkit flameshot dunst
+    # Add installation and setup commands for dwm-curado here
+    # For example:
+    git clone https://github.com/curadotd/dwm-curado.git $git_path/dwm-curado
+    cd $git_path/dwm-curado
+    sudo make clean install
+    # Add any additional configuration steps
+else
+    echo "Skipping dwm-curado installation and setup."
+fi
+
+# Ask user if they want to install and setup slstatus-curado
+read -p "Do you want to install and setup slstatus-curado, a fork of slstatus? (y/n) " install_slstatus_curado
+
+if [[ $install_slstatus_curado =~ ^[Yy]$ ]]; then
+    echo "Installing and setting up slstatus-curado..."
+    echo "Installing dependencies"
+    sudo apt install libx11-dev libxft-dev libxinerama-dev
+    # Add installation and setup commands for slstatus_curado here
+    # For example:
+    git clone https://github.com/curadotd/slstatus-curado.git $git_path/slstatus-curado
+    cd $git_path/slstatus-curado
+    sudo make clean install
+    # Add any additional configuration steps
+else
+    echo "Skipping dwm-curado installation and setup."
+fi
+
+$git_path/compile_picom
+
+$git_path/install_starship
+
+$git_path/install_mattermost_desktop
+
+# Ask user if they want to use dotconfig files
+read -p "Do you want to use the dotconfig files? (y/n) " use_dotconfig
+
+if [[ $use_dotconfig =~ ^[Yy]$ ]]; then
+    echo "Setting up dotconfig files..."
+    
+    # Check if .config folder exists
+    if [ ! -d "$HOME/.config" ]; then
+        echo "Creating .config folder..."
+        mkdir "$HOME/.config"
+    fi
+
+    # Clone dotconfig repository
+    echo "Cloning dotconfig repository..."
+    git clone https://github.com/curadotd/dotconfig.git $git_path/dotconfig
+
+    cd $git_path/dotconfig
+    cp -R dunst $HOME/.config/
+    cp -R kitty $HOME/.config/
+    cp -R MangoHud $HOME/.config/
+    cp -R rofi $HOME/.config/
+    cp -R gamemode.ini $HOME/.config/
+    cp -R starship.toml $HOME/.config/
+    cp -R user-dirs.dirs $HOME/.config/
+    cp -R user-dirs.locale $HOME/.config/
+
+    # You may want to add additional steps here, such as:
+    # - Moving files from .config/dotconfig to .config
+    # - Removing the temporary dotconfig folder
+    # - Setting up symlinks if necessary
+else
+    echo "Skipping dotconfig setup."
+
+$git_path/install_tokyo_nights_theme
+
+$git_path/install_web_browser
+
+$git_path/install_pcoip_client
+
+# Ask user if they want to install Steam
+read -p "Do you want to install Steam? (y/n): " steam_answer
+if [[ $steam_answer == [Yy]* ]]; then
+    echo "Installing Steam..."
+
+    sudo apt install wine64 wine32 libasound2-plugins:i386 libsdl2-2.0-0:i386 libdbus-1-3:i386 libsqlite3-0:i386
+    sudo apt install steam
+
+    echo "Steam installation completed."
+else
+    echo "Steam installation skipped."
+fi
+
+echo "All installations completed."
+
+# Ask user if they want to install LightDM greeter
+read -p "Do you want to install and enable LightDM greeter? (y/n) " install_lightdm
+
+if [[ $install_lightdm =~ ^[Yy]$ ]]; then
+    echo "Installing LightDM and LightDM GTK greeter..."
+    sudo apt install -y lightdm lightdm-gtk-greeter
+    sudo systemctl enable lightdm
+    echo "LightDM has been installed and enabled."
+else
+    echo "Skipping LightDM installation."
+fi
+
+echo "All installations completed."
+
+echo "Setup is now completed, please reboot your system."

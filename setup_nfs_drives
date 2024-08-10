@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# Function to check and install NFS
+install_nfs() {
+    if command -v pacman &> /dev/null; then
+        # Arch Linux
+        if ! pacman -Qi nfs-utils &> /dev/null; then
+            sudo pacman -S --noconfirm nfs-utils
+        fi
+    elif command -v dnf &> /dev/null; then
+        # Rocky Linux
+        if ! dnf list installed nfs-utils &> /dev/null; then
+            sudo dnf install -y nfs-utils
+        fi
+    elif command -v apt &> /dev/null; then
+        # Debian-based
+        if ! dpkg -l | grep -q nfs-common; then
+            sudo apt update
+            sudo apt install -y nfs-common
+        fi
+    else
+        echo "Unsupported package manager. Please install NFS manually."
+        exit 1
+    fi
+}
+
+# Ask user if they want to install NFS tools
+read -p "Do you want to install NFS tools? (y/n): " install_choice
+
+if [[ $install_choice == "y" || $install_choice == "Y" ]]; then
+    install_nfs
+else
+    echo "Skipping NFS tools installation."
+fi
+
+
+# Ask user for setup preference
+read -p "Do you want to setup NFS shares in fstab (F) or create a manual mount script (M)? " setup_choice
+
+if [[ $setup_choice == "F" || $setup_choice == "f" ]]; then
+    # Setup in fstab
+    echo "" | sudo tee -a /etc/fstab
+    echo "" | sudo tee -a /etc/fstab
+    echo "#Mount NetWorkShares" | sudo tee -a /etc/fstab
+    read -p "Enter the number of NFS shares to mount: " num_shares
+
+    for ((i=1; i<=$num_shares; i++)); do
+        read -p "Enter server location for share $i: " server_location
+        read -p "Enter mount point for share $i: " mount_point
+
+        sudo mkdir -p "$mount_point"
+
+        if ! grep -q "$mount_point" /etc/fstab; then
+            echo "$server_location $mount_point nfs defaults 0 0" | sudo tee -a /etc/fstab
+        fi
+    done
+
+    sudo mount -a
+    echo "NFS shares have been added to fstab and mounted."
+
+elif [[ $setup_choice == "M" || $setup_choice == "m" ]]; then
+    # Create manual mount script
+    script_name="mount_nfs_shares.sh"
+    echo "#!/bin/bash" > "$script_name"
+    chmod +x "$script_name"
+
+    read -p "Enter the number of NFS shares to mount: " num_shares
+
+    for ((i=1; i<=$num_shares; i++)); do
+        read -p "Enter server location for share $i: " server_location
+        read -p "Enter mount point for share $i: " mount_point
+
+        echo "sudo mkdir -p $mount_point" >> "$script_name"
+        echo "sudo mount -t nfs $server_location $mount_point" >> "$script_name"
+    done
+
+    echo "Manual mount script '$script_name' has been created."
+    echo "You can run it with 'sudo ./$script_name' to mount the shares."
+else
+    echo "Invalid choice. Please run the script again and choose F or M."
+    exit 1
+fi

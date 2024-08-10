@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# Function to get the latest release URL for a given file type
+get_latest_release_url() {
+    local file_type=$1
+    curl -s https://api.github.com/repos/mattermost/desktop/releases/latest | grep "browser_download_url.*${file_type}" | cut -d '"' -f 4
+}
+
+# Function to install Mattermost Desktop on Arch Linux
+install_arch() {
+    if ! command -v yay &> /dev/null; then
+        sudo pacman -S --needed base-devel git
+        if [ ! -d "$HOME/git" ]; then
+            mkdir "$HOME/git"
+        fi
+        git clone https://aur.archlinux.org/yay.git
+        cd yay
+        makepkg -si
+        cd ..
+    fi
+    if ! pacman -Qi mattermost-desktop &> /dev/null; then
+        yay mattermost-desktop
+    else
+        echo "mattermost-desktop is already installed"
+    fi
+}
+
+# Function to install Mattermost Desktop on Rocky Linux
+install_rocky() {
+    if ! rpm -q mattermost-desktop; then
+        sudo dnf install mattermost-desktop || {
+            url=$(get_latest_release_url "linux-x86_64.rpm")
+            wget $url
+            sudo dnf install mattermost-desktop-*-linux-x86_64.rpm
+        }
+    else
+        echo "mattermost-desktop is already installed"
+    fi
+}
+
+# Function to install Mattermost Desktop on Debian
+install_debian() {
+    if ! dpkg -l | grep mattermost-desktop; then
+        sudo apt-get install mattermost-desktop || {
+        curl -fsS -o- https://deb.packages.mattermost.com/setup-repo.sh | sudo bash
+        sudo apt update
+	    sudo apt install mattermost-desktop
+        }
+    else
+        echo "mattermost-desktop is already installed"
+    fi
+}
+
+# Ask user if they want to install Mattermost Desktop
+read -p "Do you want to install Mattermost Desktop? (y/n): " install_choice
+
+if [[ $install_choice =~ ^[Yy]$ ]]; then
+    # Detect the OS and call the appropriate function
+    if [ -f /etc/arch-release ]; then
+        install_arch
+    elif [ -f /etc/rocky-release ]; then
+        install_rocky
+    elif [ -f /etc/debian_version ]; then
+        install_debian
+    else
+        echo "Unsupported OS"
+    fi
+else
+    echo "Installation cancelled."
+fi

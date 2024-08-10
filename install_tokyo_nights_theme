@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Ask user if they want to install Tokyo Night theme
+read -p "Do you want to install the Tokyo Night theme? (y/n): " theme_answer
+if [[ $theme_answer == [Yy]* ]]; then
+    echo "Installing Tokyo Night theme..."
+    git clone https://github.com/stronk-dev/Tokyo-Night-Linux.git
+    cd Tokyo-Night-Linux
+    sudo cp  usr/share/themes/TokyoNight /usr/share/themes/
+    sudo cp  -R usr/share/themes/TokyoNight /usr/share/themes/
+    # You might want to add installation steps here, depending on the theme's requirements
+    echo "Tokyo Night theme installed. Please follow the theme's documentation for activation."
+else
+    echo "Tokyo Night theme installation skipped."
+fi
+
+echo "Script execution completed."

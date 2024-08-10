@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Ask user about browser installation
+echo "Which browser would you like to install?"
+echo "1. Thorium Browser (latest version)"
+echo "2. Google Chrome"
+echo "3. Firefox"
+echo "4. None"
+read -p "Enter your choice (1-4): " browser_choice
+
+# Save current directory and change to Downloads folder
+current_dir=$(pwd)
+cd ~/Downloads
+
+case $browser_choice in
+    1)
+        echo "Installing latest version of Thorium Browser..."
+        sudo wget https://dl.thorium.rocks/debian/dists/stable/thorium.list -O /etc/apt/sources.list.d/thorium.list
+        sudo apt update
+        sudo apt install thorium-browser
+        ;;
+    2)
+        echo "Installing Google Chrome..."
+        wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        sudo dpkg -i google-chrome-stable_current_amd64.deb
+        sudo apt install -f
+        rm google-chrome-stable_current_amd64.deb
+        ;;
+    3)
+        echo "Installing Firefox..."
+        sudo apt install -y firefox-esr
+        ;;
+    4)
+        echo "Skipping browser installation."
+        ;;
+    *)
+        echo "Invalid choice. Skipping browser installation."
+        ;;
+esac
+
+# Return to the original directory
+cd "$current_dir"
