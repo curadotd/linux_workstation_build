@@ -29,7 +29,7 @@ sudo apt install libconfig-dev libdbus-1-dev libegl-dev libgl-dev libepoxy-dev l
 libxcb-composite0-dev libxcb-damage0-dev libxcb-dpms0-dev libxcb-glx0-dev libxcb-image0-dev libxcb-randr0-dev libxcb-render0-dev \
 libxcb-render-util0-dev libxcb-shape0-dev libxcb-util-dev libxcb-xfixes0-dev libxext-dev meson ninja-build uthash-dev cmake \
 build-essential tar tree multitail tldr trash-cli unzip cmake make jq lxappearance papirus-icon-theme fonts-noto-color-emoji \
-starship lm-sensors thunar x11-xserver-utils pipewire wireplumber pavucontrol xdg-utils xinput rofi wget gh
+lm-sensors thunar x11-xserver-utils pipewire wireplumber pavucontrol xdg-utils xinput rofi wget gh
 
 $git_path/install_fonts
 
@@ -58,7 +58,7 @@ read -p "Do you want to install and setup dwm-curado, a fork of dwm-titus? (y/n)
 if [[ $install_dwm_curado =~ ^[Yy]$ ]]; then
     echo "Installing and setting up dwm-curado..."
     echo "Installing dependencies"
-    sudo apt install libx11-dev libxft-dev libimlib2-dev libxinerama-dev libxcb-res0-dev kitty feh mate-polkit flameshot dunst
+    sudo apt install libx11-dev libxft-dev libimlib2-dev libxinerama-dev libxcb-res0-dev kitty feh mate-polkit flameshot dunst x11-xcb
     # Add installation and setup commands for dwm-curado here
     # For example:
     git clone https://github.com/curadotd/dwm-curado.git $git_path/dwm-curado
