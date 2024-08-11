@@ -1,11 +1,35 @@
 #!/bin/bash
 
+current_dir=$(pwd)
+
+# Ask user if they want to use picom files
+read -p "Do you want to install picom? (y/n) " install_picom
+
+# Ask user to create a default git location
+read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
+if [[ $create_git_dir =~ ^[Yy]$ ]]; then
+    read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+    git_path=${git_path:-$HOME/git}
+    
+    if [ ! -d "$git_path" ]; then
+        mkdir -p "$git_path"
+        echo "Created git directory at $git_path"
+    else
+        echo "Git directory already exists at $git_path"
+    fi
+    
+    # Export the git path to use later in the script
+    export GIT_PATH="$git_path"
+else
+    echo "Skipping git directory creation."
+fi
+
 # Ask user if they want to install Tokyo Night theme
 read -p "Do you want to install the Tokyo Night theme? (y/n): " theme_answer
 if [[ $theme_answer == [Yy]* ]]; then
     echo "Installing Tokyo Night theme..."
-    git clone https://github.com/stronk-dev/Tokyo-Night-Linux.git
-    cd Tokyo-Night-Linux
+    git clone https://github.com/stronk-dev/Tokyo-Night-Linux.git $git_path/Tokyo-Night-Linux
+    cd $git_path/Tokyo-Night-Linux
     sudo cp  usr/share/themes/TokyoNight /usr/share/themes/
     sudo cp  -R usr/share/themes/TokyoNight /usr/share/themes/
     # You might want to add installation steps here, depending on the theme's requirements
@@ -13,5 +37,7 @@ if [[ $theme_answer == [Yy]* ]]; then
 else
     echo "Tokyo Night theme installation skipped."
 fi
+
+cd $current_dir
 
 echo "Script execution completed."
