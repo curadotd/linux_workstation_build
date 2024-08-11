@@ -21,9 +21,9 @@ if ! command_exists wget; then
     exit 1
 fi
 
-# Download the latest .deb package
-echo "Downloading the latest Cursor .deb package..."
-wget -O cursor.deb "https://download.cursor.sh/linux/appimages/x64/Cursor-latest.deb"
+# Download the latest AppImage
+echo "Downloading the latest Cursor AppImage..."
+wget -O cursor.AppImage "https://cursor.sh/download/linux-appimage"
 
 # Check if the download was successful
 if [ $? -ne 0 ]; then
@@ -31,19 +31,36 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Install the .deb package
-echo "Installing Cursor..."
-sudo dpkg -i cursor.deb
+# Make the AppImage executable
+chmod +x cursor.AppImage
 
-# Check if the installation was successful
-if [ $? -ne 0 ]; then
-    echo "Installation failed. Attempting to resolve dependencies..."
-    sudo apt-get install -f -y
-    sudo dpkg -i cursor.deb
-fi
+# Move the AppImage to a suitable location (e.g., /usr/local/bin)
+sudo mv cursor.AppImage /usr/local/bin/cursor
 
-# Clean up the downloaded .deb file
-rm cursor.deb
+echo "Cursor has been successfully downloaded and made executable!"
+
+# Download the Cursor icon
+echo "Downloading Cursor icon..."
+wget -O cursor_icon.png "https://www.cursor.so/favicon.png"
+
+# Create the icons directory if it doesn't exist
+mkdir -p ~/.local/share/icons
+
+# Move the icon to the appropriate location
+mv cursor_icon.png ~/.local/share/icons/cursor.png
+
+# Create a desktop entry
+cat << EOF > ~/.local/share/applications/cursor.desktop
+[Desktop Entry]
+Name=Cursor
+Exec=/usr/local/bin/cursor
+Icon=${HOME}/.local/share/icons/cursor.png
+Type=Application
+Categories=Development;
+EOF
+
+echo "A desktop entry has been created for Cursor."
+echo "Cursor has been successfully installed!"
+echo "You can now run Cursor by typing 'cursor' in the terminal or launching it from your application menu."
 
 echo "Cursor has been successfully installed!"
-
