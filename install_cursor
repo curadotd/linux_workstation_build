@@ -9,33 +9,22 @@ if [[ $confirm != [yY] && $confirm != [yY][eE][sS] ]]; then
     exit 0
 fi
 
+echo "Please download Cursor from https://www.cursor.com/"
+echo "Once you've downloaded the file, place it in your $HOME/Downloads folder."
+read -p "Press Enter when you've completed this step..."
 
-# Function to check if a command exists
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
-}
-
-# Check if wget is installed
-if ! command_exists wget; then
-    echo "wget is not installed. Please install it and try again."
-    exit 1
-fi
-
-# Download the latest AppImage
-echo "Downloading the latest Cursor AppImage..."
-wget -O cursor.AppImage "https://cursor.sh/download/linux-appimage"
-
-# Check if the download was successful
-if [ $? -ne 0 ]; then
-    echo "Failed to download Cursor. Please check your internet connection and try again."
+# Check if the file exists in the Downloads folder
+if [ ! -f "$HOME/Downloads/cursor.AppImage" ]; then
+    echo "cursor.AppImage not found in $HOME/Downloads folder."
+    echo "Please make sure you've downloaded the file and named it 'cursor.AppImage'."
     exit 1
 fi
 
 # Make the AppImage executable
-chmod +x cursor.AppImage
+chmod +x "$HOME/Downloads/cursor*.AppImage"
 
-# Move the AppImage to a suitable location (e.g., /usr/local/bin)
-sudo mv cursor.AppImage /usr/local/bin/cursor
+# Move the AppImage to a suitable location
+sudo mv "$HOME/Downloads/cursor*.AppImage" /opt/cursor
 
 echo "Cursor has been successfully downloaded and made executable!"
 
@@ -53,7 +42,7 @@ mv cursor_icon.png ~/.local/share/icons/cursor.png
 cat << EOF > ~/.local/share/applications/cursor.desktop
 [Desktop Entry]
 Name=Cursor
-Exec=/usr/local/bin/cursor
+Exec=/opt/cursor
 Icon=${HOME}/.local/share/icons/cursor.png
 Type=Application
 Categories=Development;
