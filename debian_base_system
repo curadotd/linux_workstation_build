@@ -9,7 +9,7 @@ libxcb-render-util0-dev libxcb-shape0-dev libxcb-util-dev libxcb-xfixes0-dev lib
 build-essential tar tree multitail tldr trash-cli unzip cmake make jq lxappearance papirus-icon-theme fonts-noto-color-emoji \
 lm-sensors thunar x11-xserver-utils pipewire wireplumber pavucontrol xdg-utils xinput rofi wget gh
 
-$git_path/install_fonts
+$git_path/linux_workstation_build/install_fonts
 
 # Ask user to create a default git location
 read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
