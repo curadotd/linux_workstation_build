@@ -54,7 +54,7 @@ read -p "Do you want to install and setup slstatus-curado, a fork of slstatus? (
 if [[ $install_slstatus_curado =~ ^[Yy]$ ]]; then
     echo "Installing and setting up slstatus-curado..."
     echo "Installing dependencies"
-    sudo apt install libx11-dev libxft-dev libxinerama-dev
+    sudo apt install libx11-dev libxft-dev libxinerama-dev alsa-oss sndiod
     # Add installation and setup commands for slstatus_curado here
     # For example:
     git clone https://github.com/curadotd/slstatus-curado.git $git_path/slstatus-curado
