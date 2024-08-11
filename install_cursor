@@ -14,17 +14,17 @@ echo "Once you've downloaded the file, place it in your $HOME/Downloads folder."
 read -p "Press Enter when you've completed this step..."
 
 # Check if the file exists in the Downloads folder
-if [ ! -f "$HOME/Downloads/cursor*.AppImage" ]; then
-    echo "cursor*.AppImage not found in $HOME/Downloads folder."
-    echo "Please make sure you've downloaded the file and named it 'cursor.AppImage'."
+if [ ! -f "$HOME/Downloads/cursor-*-x86_64.AppImage" ]; then
+    echo "Cursor AppImage not found in $HOME/Downloads folder."
+    echo "Please make sure you've downloaded the file. It should be named like 'cursor-<version>-x86_64.AppImage'."
     exit 1
 fi
 
 # Make the AppImage executable
-chmod +x "$HOME/Downloads/cursor*.AppImage"
+chmod +x "$HOME/Downloads/cursor-*-x86_64.AppImage"
 
 # Move the AppImage to a suitable location
-sudo mv "$HOME/Downloads/cursor*.AppImage" /opt/cursor
+sudo mv "$HOME/Downloads/cursor-*-x86_64.AppImage" /opt/cursor.AppImage
 
 echo "Cursor has been successfully downloaded and made executable!"
 
@@ -42,7 +42,7 @@ mv cursor_icon.png ~/.local/share/icons/cursor.png
 cat << EOF > ~/.local/share/applications/cursor.desktop
 [Desktop Entry]
 Name=Cursor
-Exec=/opt/cursor
+Exec=/opt/cursor.AppImage
 Icon=${HOME}/.local/share/icons/cursor.png
 Type=Application
 Categories=Development;
