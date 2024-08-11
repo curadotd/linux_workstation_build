@@ -10,6 +10,8 @@ build-essential tar tree multitail tldr trash-cli unzip cmake make jq lxappearan
 lm-sensors thunar x11-xserver-utils pavucontrol xdg-utils xinput rofi wget gh libasound2 libasound2-plugins libasound2-doc \
 alsa-utils alsa-oss alsamixergui apulse alsa-firmware-loaders 
 
+sudo alsactl init
+
 # Ask user to create a default git location
 read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
 if [[ $create_git_dir =~ ^[Yy]$ ]]; then
