@@ -32,20 +32,20 @@ echo "Cursor has been successfully downloaded and made executable!"
 
 # Download the Cursor icon
 echo "Downloading Cursor icon..."
-wget -O cursor_icon.png "https://www.cursor.so/favicon.png"
+wget -O cursor_icon.jpg "https://pbs.twimg.com/profile_images/1794806483219337216/9vW73mux_400x400.jpg"
 
 # Create the icons directory if it doesn't exist
 mkdir -p ~/.local/share/icons
 
 # Move the icon to the appropriate location
-mv cursor_icon.png ~/.local/share/icons/cursor.png
+mv cursor_icon.jpg ~/.local/share/icons/cursor.jpg
 
 # Create a desktop entry
 cat << EOF > ~/.local/share/applications/cursor.desktop
 [Desktop Entry]
 Name=Cursor
 Exec=/opt/cursor.AppImage
-Icon=${HOME}/.local/share/icons/cursor.png
+Icon=${HOME}/.local/share/icons/cursor.jpg
 Type=Application
 Categories=Development;
 EOF
