@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Function to install Darktable
+install_darktable() {
+    if [[ "$1" == "debian" ]]; then
+        sudo apt update
+        sudo apt install -y darktable
+    elif [[ "$1" == "rockylinux" ]]; then
+        sudo dnf install -y epel-release
+        sudo dnf install -y darktable
+    elif [[ "$1" == "arch" ]]; then
+        sudo pacman -Syu --noconfirm darktable
+    else
+        echo "Unsupported distribution"
+        exit 1
+    fi
+}
+
+# Detect the distribution
+if [[ -f /etc/debian_version ]]; then
+    DISTRO="debian"
+elif [[ -f /etc/rocky-release ]]; then
+    DISTRO="rockylinux"
+elif [[ -f /etc/arch-release ]]; then
+    DISTRO="arch"
+else
+    echo "Unsupported distribution"
+    exit 1
+fi
+
+# Ask if the user wants to install Darktable
+read -p "Do you want to install Darktable? (y/n): " install_choice
+if [[ $install_choice == "y" || $install_choice == "Y" ]]; then
+    install_darktable $DISTRO
+    echo "Darktable has been installed."
+else
+    echo "Skipping Darktable installation."
+fi
+
+# Ask for the git clone location
+default_git_location="$HOME/git"
+read -p "Enter the location to clone the t3mujinpack (default: $default_git_location): " git_location
+git_location=${git_location:-$default_git_location}
+
+# Create the directory if it doesn't exist
+mkdir -p "$git_location"
+
+# Clone the t3mujinpack repository
+git clone https://github.com/t3mujin/t3mujinpack.git "$git_location/t3mujinpack"
+
+echo "t3mujinpack has been cloned to $git_location/t3mujinpack"
+
+echo "To install the presets in Darktable:"
+echo "1. Open Darktable"
+echo "2. Go to Lighttable mode"
+echo "3. Find the Styles box"
+echo "4. Click Import"
+echo "5. Navigate to $git_location/t3mujinpack"
+echo "6. Select all or only the presets you want to install"
+echo "7. Click Import to add the selected presets to Darktable"

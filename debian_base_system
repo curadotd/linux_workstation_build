@@ -155,5 +155,6 @@ echo "All installations completed."
 $git_path/linux_workstation_build/install_obs_studio
 $git_path/linux_workstation_build/setup_nfs_drives
 $git_path/linux_workstation_build/install_cursor
+$git_path/linux_workstation_build/install_darktable
 
 echo "Setup is now completed, please reboot your system."
