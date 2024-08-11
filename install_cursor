@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Ask for user confirmation
+echo "This script will download and install the latest version of Cursor for Debian."
+read -p "Do you want to proceed? (y/n): " confirm
+
+if [[ $confirm != [yY] && $confirm != [yY][eE][sS] ]]; then
+    echo "Installation cancelled."
+    exit 0
+fi
+
+
+# Function to check if a command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Check if wget is installed
+if ! command_exists wget; then
+    echo "wget is not installed. Please install it and try again."
+    exit 1
+fi
+
+# Download the latest .deb package
+echo "Downloading the latest Cursor .deb package..."
+wget -O cursor.deb "https://download.cursor.sh/linux/appimages/x64/Cursor-latest.deb"
+
+# Check if the download was successful
+if [ $? -ne 0 ]; then
+    echo "Failed to download Cursor. Please check your internet connection and try again."
+    exit 1
+fi
+
+# Install the .deb package
+echo "Installing Cursor..."
+sudo dpkg -i cursor.deb
+
+# Check if the installation was successful
+if [ $? -ne 0 ]; then
+    echo "Installation failed. Attempting to resolve dependencies..."
+    sudo apt-get install -f -y
+    sudo dpkg -i cursor.deb
+fi
+
+# Clean up the downloaded .deb file
+rm cursor.deb
+
+echo "Cursor has been successfully installed!"
+
