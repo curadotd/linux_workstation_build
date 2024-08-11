@@ -7,7 +7,7 @@ sudo apt install libconfig-dev libdbus-1-dev libegl-dev libgl-dev libepoxy-dev l
 libxcb-composite0-dev libxcb-damage0-dev libxcb-dpms0-dev libxcb-glx0-dev libxcb-image0-dev libxcb-randr0-dev libxcb-render0-dev \
 libxcb-render-util0-dev libxcb-shape0-dev libxcb-util-dev libxcb-xfixes0-dev libxext-dev meson ninja-build uthash-dev cmake \
 build-essential tar tree multitail tldr trash-cli unzip cmake make jq lxappearance papirus-icon-theme fonts-noto-color-emoji \
-lm-sensors thunar x11-xserver-utils pavucontrol xdg-utils xinput rofi wget gh libasound2 libasound2-plugins libasound2-doc \
+lm-sensors thunar x11-xserver-utils pavucontrol xdg-utils xinput rofi wget gh libasound2-plugins libasound2-doc \
 alsa-utils alsa-oss alsamixergui apulse alsa-firmware-loaders 
 
 sudo alsactl init
