@@ -1,0 +1,169 @@
+#!/bin/bash
+
+# Function to install dependencies for Debian-based systems
+install_debian_dependencies() {
+    sudo apt-get update
+    sudo apt-get install libssl1.1 ocl-icd-opencl-dev fakeroot xorriso libapr1 libaprutil1
+}
+
+# Function to install dependencies for Rocky Linux
+install_rocky_dependencies() {
+    sudo dnf install openssl ocl-icd-devel fakeroot xorriso
+}
+
+# Function to install yay on Arch Linux
+install_yay() {
+    echo "Installing yay..."
+    sudo pacman -S --needed git base-devel
+    git clone https://aur.archlinux.org/yay.git
+    cd yay
+    makepkg -si --noconfirm
+    cd ..
+    rm -rf yay
+}
+
+# Function to install DaVinci Resolve on Arch Linux
+install_arch_davinci() {
+    if ! command -v yay &> /dev/null; then
+        read -p "yay is not installed. Do you want to install it? (y/n): " install_yay
+        if [[ $install_yay =~ ^[Yy]$ ]]; then
+            install_yay
+        else
+            echo "yay is required to install DaVinci Resolve on Arch Linux. Exiting."
+            exit 1
+        fi
+    fi
+    yay -S davinci-resolve
+}
+
+# Function to install graphics drivers and dependencies for Debian-based systems
+install_debian_graphics() {
+    local gpu_type=$1
+    sudo apt-get update
+    sudo apt-get install fakeroot xorriso libxcb-xinput0 libxcb-xinerama0 \
+    libxcb-keysyms1 libxcb-icccm4 libxcb-cursor0 libxcb-render-util0 \
+    libxcb-image0 libxcb-composite0 libaprutil1 libapr1
+
+    case $gpu_type in
+        nvidia)
+            sudo apt-get install nvidia-driver nvidia-opencl-icd libcuda1 libnvidia-encode1
+            ;;
+        amd)
+            sudo apt-get install mesa-opencl-icd rocm-opencl-runtime
+            ;;
+        intel)
+            sudo apt-get install intel-opencl-icd
+            ;;
+        *)
+            echo "Unsupported GPU type. Please install graphics drivers manually."
+            ;;
+    esac
+}
+
+# Function to install graphics drivers and dependencies for Rocky Linux
+install_rocky_graphics() {
+    local gpu_type=$1
+    sudo dnf install fakeroot xorriso libxcb libXinerama libXcursor
+
+    case $gpu_type in
+        nvidia)
+            sudo dnf install akmod-nvidia xorg-x11-drv-nvidia xorg-x11-drv-nvidia-cuda
+            ;;
+        amd)
+            sudo dnf install mesa-libOpenCL rocm-opencl
+            ;;
+        intel)
+            sudo dnf install intel-opencl
+            ;;
+        *)
+            echo "Unsupported GPU type. Please install graphics drivers manually."
+            ;;
+    esac
+}
+
+# Ask user if they want to install DaVinci Resolve
+read -p "Do you want to install DaVinci Resolve for Linux? (y/n): " install_resolve
+
+if [[ $install_resolve =~ ^[Yy]$ ]]; then
+    # Detect the Linux distribution
+    if [ -f /etc/debian_version ] || [ -f /etc/lsb-release ] || [ -f /etc/rocky-release ]; then
+        if [ -f /etc/debian_version ] || [ -f /etc/lsb-release ]; then
+            echo "Debian-based system detected (e.g., Debian, Ubuntu). Installing dependencies..."
+            install_debian_dependencies
+            echo "Please select your GPU type (nvidia/amd/intel):"
+            read gpu_type
+            install_debian_graphics $gpu_type
+        elif [ -f /etc/rocky-release ]; then
+            echo "Rocky Linux detected. Installing dependencies..."
+            install_rocky_dependencies
+            echo "Please select your GPU type (nvidia/amd/intel):"
+            read gpu_type
+            install_rocky_graphics $gpu_type
+        fi
+
+        echo "Please download DaVinci Resolve from https://www.blackmagicdesign.com/products/davinciresolve"
+        echo "Save the file in your $HOME/Downloads directory."
+        read -p "Press Enter when you have completed the download."
+
+        read -p "Enter the name of the downloaded file: " resolve_file
+
+        if [ ! -f "$HOME/Downloads/$resolve_file" ]; then
+            echo "File not found. Please make sure you entered the correct filename."
+            exit 1
+        fi
+
+        echo "Extracting the installer..."
+        cd "$HOME/Downloads"
+        unzip "$resolve_file"
+
+        run_file=$(find . -name "*.run" -type f)
+        if [ -z "$run_file" ]; then
+            echo "Could not find the .run file. Installation failed."
+            exit 1
+        fi
+
+        echo "Running the installer..."
+        chmod +x "$run_file"
+        if [ -f /etc/debian_version ] || [ -f /etc/lsb-release ]; then
+            sudo SKIP_PACKAGE_CHECK=1 ./$run_file
+        else
+            sudo ./$run_file
+        fi
+
+        if [ -f /etc/debian_version ] || [ -f /etc/lsb-release ]; then
+            echo "Fixing dependencies for Debian-based system..."
+            # Array with library names
+            libraries=(
+            "libglib-2.0.so.0"
+            "libgobject-2.0.so.0"
+            "libgstreamer-1.0.so.0"
+            "libgstsdp-1.0.so.0"
+            "libgstwebrtc-1.0.so.0"
+            "libgio-2.0.so.0"
+            "libgmodule-2.0.so.0"
+            "libgstrtp-1.0.so.0"
+            "libgstpbutils-1.0.so.0"
+            "libgstbase-1.0.so.0"
+            "libgstvideo-1.0.so.0"
+            "libgstaudio-1.0.so.0"
+            "libgsttag-1.0.so.0"
+            "liborc-0.4.so.0"
+            )
+
+            # Loop to create symbolic links
+            for lib in "${libraries[@]}"; do
+                sudo ln -sf "/usr/lib/x86_64-linux-gnu/$lib" /opt/resolve/libs/
+            done
+        fi
+
+        echo "DaVinci Resolve installation completed."
+    elif [ -f /etc/arch-release ]; then
+        echo "Arch Linux detected. Using yay to install DaVinci Resolve..."
+        install_arch_davinci
+    else
+        echo "Unsupported Linux distribution. Please install dependencies manually."
+        exit 1
+    fi
+else
+    echo "Skipping DaVinci Resolve installation."
+fi
