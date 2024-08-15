@@ -7,6 +7,25 @@ sudo apt install build-essential dkms linux-headers-amd64 libgl1-mesa-dev pkg-co
 # Ask user if they want to install graphics drivers
 read -p "Do you want to install graphics drivers? (y/n) " install_drivers
 
+# Ask if the user wants to use Debian Sid (unstable)
+read -p "Do you want to use Debian Sid (unstable)? This is not recommended for production systems. (y/n): " sid_choice
+if [[ "$sid_choice" == "y" ]]; then
+    echo "Switching to Debian Sid..."
+    # Comment out existing entries in sources.list
+    sudo sed -i 's/^/#/' /etc/apt/sources.list
+
+    # Add Debian Sid repositories
+    echo "# Debian Sid repositories" | sudo tee -a /etc/apt/sources.list
+    echo "deb http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
+    echo "deb-src http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
+    sudo apt update
+    # Perform full system upgrade
+    sudo apt upgrade
+    echo "System upgraded to Debian Sid."
+else
+    echo "Continuing with the current Debian version."
+fi
+
 if [[ $install_drivers =~ ^[Yy]$ ]]; then
     # Check for NVIDIA GPU
     if lspci | grep -i nvidia > /dev/null; then
@@ -29,25 +48,6 @@ if [[ $install_drivers =~ ^[Yy]$ ]]; then
     fi
 else
     echo "Skipping graphics driver installation."
-fi
-
-# Ask if the user wants to use Debian Sid (unstable)
-read -p "Do you want to use Debian Sid (unstable)? This is not recommended for production systems. (y/n): " sid_choice
-if [[ "$sid_choice" == "y" ]]; then
-    echo "Switching to Debian Sid..."
-    # Comment out existing entries in sources.list
-    sudo sed -i 's/^/#/' /etc/apt/sources.list
-
-    # Add Debian Sid repositories
-    echo "# Debian Sid repositories" | sudo tee -a /etc/apt/sources.list
-    echo "deb http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
-    echo "deb-src http://deb.debian.org/debian/ sid main contrib non-free non-free-firmware" | sudo tee -a /etc/apt/sources.list
-    sudo apt update
-    # Perform full system upgrade
-    sudo apt upgrade
-    echo "System upgraded to Debian Sid."
-else
-    echo "Continuing with the current Debian version."
 fi
 
 # Clean up
