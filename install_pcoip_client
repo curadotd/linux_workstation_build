@@ -44,8 +44,8 @@ if [[ $install_pciop =~ ^[Yy]$ ]]; then
             rm libprotobuf23_3.12.4-1+deb11u1_amd64.deb
             cd "$current_dir" 
             sudo apt update
-            sudo apt install pciop-client
-            echo "pciop-client has been installed successfully."
+            sudo apt install pcoip-client
+            echo "pcoip-client has been installed successfully."
         else
             echo "pcoip-client is already installed on Debian"
         fi
