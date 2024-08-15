@@ -4,9 +4,6 @@
 sudo apt update
 sudo apt install build-essential dkms linux-headers-amd64 libgl1-mesa-dev pkg-config
 
-# Ask user if they want to install graphics drivers
-read -p "Do you want to install graphics drivers? (y/n) " install_drivers
-
 # Ask if the user wants to use Debian Sid (unstable)
 read -p "Do you want to use Debian Sid (unstable)? This is not recommended for production systems. (y/n): " sid_choice
 if [[ "$sid_choice" == "y" ]]; then
@@ -26,6 +23,8 @@ else
     echo "Continuing with the current Debian version."
 fi
 
+# Ask user if they want to install graphics drivers
+read -p "Do you want to install graphics drivers? (y/n) " install_drivers
 if [[ $install_drivers =~ ^[Yy]$ ]]; then
     # Check for NVIDIA GPU
     if lspci | grep -i nvidia > /dev/null; then
