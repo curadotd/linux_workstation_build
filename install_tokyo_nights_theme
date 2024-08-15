@@ -2,8 +2,8 @@
 
 current_dir=$(pwd)
 
-# Ask user if they want to use picom files
-read -p "Do you want to install picom? (y/n) " install_picom
+# Ask user if they want to use Tokyo Nights theme files
+read -p "Do you want to install Tokyo Nights theme? (y/n) " install_tokyo_nights_theme
 
 # Ask user to create a default git location
 read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
