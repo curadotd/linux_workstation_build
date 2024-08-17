@@ -3,7 +3,7 @@
 # Function to install dependencies for Debian-based systems
 install_debian_dependencies() {
     sudo apt-get update
-    sudo apt-get install libssl1.1 ocl-icd-opencl-dev fakeroot xorriso libapr1 libaprutil1
+    sudo apt-get install libssl-dev ocl-icd-opencl-dev fakeroot xorriso libapr1 libaprutil1
 }
 
 # Function to install dependencies for Rocky Linux
