@@ -11,7 +11,7 @@ libxcb-composite0-dev libxcb-damage0-dev libxcb-dpms0-dev libxcb-glx0-dev libxcb
 libxcb-render-util0-dev libxcb-shape0-dev libxcb-util-dev libxcb-xfixes0-dev libxext-dev meson ninja-build uthash-dev cmake \
 build-essential tar tree multitail tldr trash-cli unzip cmake make jq lxappearance papirus-icon-theme fonts-noto-color-emoji \
 lm-sensors thunar x11-xserver-utils pavucontrol xdg-utils xinput rofi wget gh libasound2-plugins libasound2-doc \
-alsa-utils alsa-oss alsamixergui apulse alsa-firmware-loaders locate krita gimp
+alsa-utils alsa-oss alsamixergui apulse alsa-firmware-loaders locate krita gimp qt5ct qt5-style-kvantum
 
 sudo alsactl init
 
@@ -107,6 +107,7 @@ if [[ $use_dotconfig =~ ^[Yy]$ ]]; then
     cp -R starship.toml $HOME/.config/
     cp -R user-dirs.dirs $HOME/.config/
     cp -R user-dirs.locale $HOME/.config/
+    cp -R qt5ct $HOME/.config/
 
     cd $current_dir
 

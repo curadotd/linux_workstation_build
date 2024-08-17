@@ -32,8 +32,17 @@ if [[ $theme_answer == [Yy]* ]]; then
     cd $git_path/Tokyo-Night-Linux
     sudo cp  usr/share/themes/TokyoNight /usr/share/themes/
     sudo cp  -R usr/share/themes/TokyoNight /usr/share/themes/
-    # You might want to add installation steps here, depending on the theme's requirements
-    echo "Tokyo Night theme installed. Please follow the theme's documentation for activation."
+
+    # Create qt5ct color scheme file
+    sudo mkdir -p /usr/share/qt5ct/colors
+    sudo tee /usr/share/qt5ct/colors/tokyo.conf > /dev/null << EOL
+[ColorScheme]
+active_colors=#7aa2f7, #24283b, #565f89, #c0caf5, #414868, #414868, #c0caf5, #414868, #7aa2f7, #1a1b26, #1a1b26, #414868, #343b58, #7aa2f7, #9ece6a, #9ece6a, #414868, #343b58, #414868, #565a6e, #414868
+disabled_colors=#7aa2f7, #24283b, #565f89, #c0caf5, #414868, #414868, #c0caf5, #414868, #7aa2f7, #1a1b26, #1a1b26, #414868, #c0caf5, #7aa2f7, #9ece6a, #9ece6a, #414868, #c0caf5, #414868, #565a6e, #414868
+inactive_colors=#7aa2f7, #24283b, #565f89, #c0caf5, #414868, #414868, #c0caf5, #414868, #7aa2f7, #1a1b26, #1a1b26, #414868, #c0caf5, #7aa2f7, #9ece6a, #9ece6a, #414868, #c0caf5, #414868, #565a6e, #414868
+EOL
+    
+    echo "Tokyo Night theme and qt5ct color scheme installed. Please follow the theme's documentation for activation."
 else
     echo "Tokyo Night theme installation skipped."
 fi
