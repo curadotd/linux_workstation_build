@@ -28,19 +28,44 @@ fi
 read -p "Do you want to install the Tokyo Night theme? (y/n): " theme_answer
 if [[ $theme_answer == [Yy]* ]]; then
     echo "Installing Tokyo Night theme..."
-    git clone https://github.com/stronk-dev/Tokyo-Night-Linux.git $git_path/Tokyo-Night-Linux
+    
+    # Check if Tokyo-Night-Linux directory already exists
+    if [ ! -d "$git_path/Tokyo-Night-Linux" ]; then
+        git clone https://github.com/stronk-dev/Tokyo-Night-Linux.git $git_path/Tokyo-Night-Linux
+    else
+        echo "Tokyo-Night-Linux directory already exists. Skipping clone."
+    fi
+    
     cd $git_path/Tokyo-Night-Linux
-    sudo cp  usr/share/themes/TokyoNight /usr/share/themes/
-    sudo cp  -R usr/share/themes/TokyoNight /usr/share/themes/
+    
+    # Check if TokyoNight theme directory exists before copying
+    if [ ! -d "/usr/share/themes/TokyoNight" ]; then
+        sudo cp -R usr/share/themes/TokyoNight /usr/share/themes/
+    else
+        echo "TokyoNight theme directory already exists. Skipping copy."
+    fi
 
-    # Create qt5ct color scheme file
-    sudo mkdir -p /usr/share/qt5ct/colors
-    sudo tee /usr/share/qt5ct/colors/tokyo.conf > /dev/null << EOL
+    # Create qt5ct color scheme file if it doesn't exist
+    if [ ! -f "/usr/share/qt5ct/colors/tokyo.conf" ]; then
+        sudo mkdir -p /usr/share/qt5ct/colors
+        sudo tee /usr/share/qt5ct/colors/tokyo.conf > /dev/null << EOL
 [ColorScheme]
 active_colors=#7aa2f7, #24283b, #565f89, #c0caf5, #414868, #414868, #c0caf5, #414868, #7aa2f7, #1a1b26, #1a1b26, #414868, #343b58, #7aa2f7, #9ece6a, #9ece6a, #414868, #343b58, #414868, #565a6e, #414868
 disabled_colors=#7aa2f7, #24283b, #565f89, #c0caf5, #414868, #414868, #c0caf5, #414868, #7aa2f7, #1a1b26, #1a1b26, #414868, #c0caf5, #7aa2f7, #9ece6a, #9ece6a, #414868, #c0caf5, #414868, #565a6e, #414868
 inactive_colors=#7aa2f7, #24283b, #565f89, #c0caf5, #414868, #414868, #c0caf5, #414868, #7aa2f7, #1a1b26, #1a1b26, #414868, #c0caf5, #7aa2f7, #9ece6a, #9ece6a, #414868, #c0caf5, #414868, #565a6e, #414868
 EOL
+    else
+        echo "qt5ct color scheme file already exists. Skipping creation."
+    fi
+
+    # Create qt5ct.conf if it doesn't exist
+    if [ ! -f "/etc/environment.d/qt5ct.conf" ]; then
+        sudo tee /etc/environment.d/qt5ct.conf > /dev/null << EOL
+QT_QPA_PLATFORMTHEME=qt5ct
+EOL
+    else
+        echo "qt5ct.conf already exists. Skipping creation."
+    fi
     
     echo "Tokyo Night theme and qt5ct color scheme installed. Please follow the theme's documentation for activation."
 else
