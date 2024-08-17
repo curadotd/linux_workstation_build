@@ -46,7 +46,7 @@ install_debian_graphics() {
 
     case $gpu_type in
         nvidia)
-            sudo apt-get install nvidia-driver nvidia-opencl-icd libcuda1 libnvidia-encode1
+            sudo apt-get install nvidia-driver nvidia-opencl-icd libcuda1 libnvidia-encode1 libglu1-mesa libgstreamer-plugins-bad1.0-0
             ;;
         amd)
             sudo apt-get install mesa-opencl-icd rocm-opencl-runtime
