@@ -1,0 +1,57 @@
+#! /bin/bash
+
+# Ask user to create a default git location
+read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
+if [[ $create_git_dir =~ ^[Yy]$ ]]; then
+    read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+    git_path=${git_path:-$HOME/git}
+    
+    if [ ! -d "$git_path" ]; then
+        mkdir -p "$git_path"
+        echo "Created git directory at $git_path"
+    else
+        echo "Git directory already exists at $git_path"
+    fi
+    
+    # Export the git path to use later in the script
+    export GIT_PATH="$git_path"
+else
+    echo "Skipping git directory creation."
+fi
+
+# Ask user if they want to use dotconfig files
+read -p "Do you want to use the dotconfig files? (y/n) " use_dotconfig
+
+if [[ $use_dotconfig =~ ^[Yy]$ ]]; then
+    echo "Setting up dotconfig files..."
+    
+    # Check if .config folder exists
+    if [ ! -d "$HOME/.config" ]; then
+        echo "Creating .config folder..."
+        mkdir "$HOME/.config"
+    fi
+
+    # Clone dotconfig repository
+    echo "Cloning dotconfig repository..."
+    git clone https://github.com/curadotd/dotconfig.git $git_path/dotconfig
+
+    cd $git_path/dotconfig
+    cp -R dunst $HOME/.config/
+    cp -R kitty $HOME/.config/
+    cp -R MangoHud $HOME/.config/
+    cp -R rofi $HOME/.config/
+    cp -R gamemode.ini $HOME/.config/
+    cp -R starship.toml $HOME/.config/
+    cp -R user-dirs.dirs $HOME/.config/
+    cp -R user-dirs.locale $HOME/.config/
+    cp -R qt5ct $HOME/.config/
+
+    # You may want to add additional steps here, such as:
+    # - Moving files from .config/dotconfig to .config
+    # - Removing the temporary dotconfig folder
+    # - Setting up symlinks if necessary
+
+    echo "Dotconfig setup complete."
+else
+    echo "Skipping dotconfig setup."
+fi

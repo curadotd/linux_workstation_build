@@ -7,8 +7,23 @@ if [[ $install_starship =~ ^[Yy]$ ]]; then
     # Check if starship is installed
     if ! command -v starship &> /dev/null; then
         echo "Installing Starship..."
-        sudo apt install curl
-        curl -sS https://starship.rs/install.sh | sh
+        
+        # Detect the operating system
+        if [ -f /etc/arch-release ]; then
+            # Arch Linux
+            sudo pacman -S starship
+        elif [ -f /etc/debian_version ]; then
+            # Debian/Ubuntu
+            sudo apt install curl
+            curl -sS https://starship.rs/install.sh | sh
+        elif [ -f /etc/rocky-release ]; then
+            # Rocky Linux
+            sudo dnf install curl
+            curl -sS https://starship.rs/install.sh | sh
+        else
+            echo "Unsupported operating system. Please install Starship manually."
+            exit 1
+        fi
     else
         echo "Starship is already installed."
     fi
@@ -22,6 +37,7 @@ if [[ $install_starship =~ ^[Yy]$ ]]; then
         echo "Starship is already configured in .bashrc"
     fi
 
+    echo "Starship installation completed."
     echo "Please restart your terminal or run 'source ~/.bashrc' to start using Starship."
 else
     echo "Skipping Starship installation and configuration."

@@ -5,7 +5,7 @@ install_nfs() {
     if command -v pacman &> /dev/null; then
         # Arch Linux
         if ! pacman -Qi nfs-utils &> /dev/null; then
-            sudo pacman -S --noconfirm nfs-utils
+            sudo pacman -S nfs-utils
         fi
     elif command -v dnf &> /dev/null; then
         # Rocky Linux
@@ -31,6 +31,7 @@ if [[ $install_choice == "y" || $install_choice == "Y" ]]; then
     install_nfs
 else
     echo "Skipping NFS tools installation."
+    exit 1
 fi
 
 

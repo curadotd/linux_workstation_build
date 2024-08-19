@@ -1,0 +1,77 @@
+#! /bin/bash
+
+current_dir=$(pwd)
+
+# Determine the operating system
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$NAME
+elif type lsb_release >/dev/null 2>&1; then
+    OS=$(lsb_release -si)
+else
+    OS=$(uname -s)
+fi
+
+# Update and upgrade
+echo "Running update and upgrade"
+if [[ "$OS" == "Ubuntu" || "$OS" == "Debian" ]]; then
+    sudo apt update && sudo apt upgrade
+elif [[ "$OS" == "Arch Linux" ]]; then
+    sudo pacman -Syu
+elif [[ "$OS" == "Rocky Linux" ]]; then
+    sudo dnf upgrade
+else
+    echo "Unsupported operating system: $OS"
+    exit 1
+fi
+
+# Install base libraries
+echo "Install base libraries"
+if [[ "$OS" == "Ubuntu" || "$OS" == "Debian" ]]; then
+    sudo apt install tar tree multitail tldr trash-cli unzip make jq lxappearance papirus-icon-theme \
+    fonts-noto-color-emoji lm-sensors thunar x11-xserver-utils pavucontrol xdg-utils xinput rofi wget gh \
+    libasound2-plugins libasound2-doc alsa-oss alsamixergui apulse alsa-firmware-loaders locate krita gimp \
+    qt5ct qt5-style-kvantum fastfetch
+
+    sudo alsactl init
+elif [[ "$OS" == "Arch Linux" ]]; then
+    sudo pacman -S --needed tar tree multitail tldr trash-cli unzip make jq lxappearance papirus-icon-theme \
+    noto-fonts-emoji lm_sensors thunar xorg-xserver-utils pavucontrol xdg-utils xorg-xinput rofi wget github-cli \
+    alsa-plugins alsa-utils alsa-oss apulse alsa-firmware mlocate krita gimp qt5ct kvantum-qt5 fastfetch
+
+    sudo alsactl init
+elif [[ "$OS" == "Rocky Linux" ]]; then
+    sudo dnf install tar tree multitail tldr trash-cli unzip make jq lxappearance papirus-icon-theme \
+    google-noto-emoji-fonts lm_sensors thunar xorg-x11-server-utils pavucontrol xdg-utils xorg-x11-xinit-utils rofi wget gh \
+    alsa-plugins alsa-utils alsa-oss apulse alsa-firmware mlocate krita gimp qt5-qtbase qt5ct kvantum fastfetch
+
+    sudo alsactl init
+else
+    echo "Unsupported operating system: $OS"
+    exit 1
+fi
+
+$git_path/linux_workstation_build/install_fonts
+
+$git_path/linux_workstation_build/install_dwm
+
+cd $current_dir
+
+$git_path/linux_workstation_build/install_starship
+
+$git_path/linux_workstation_build/install_mattermost_desktop
+
+$git_path/linux_workstation_build/clone_dotconfig
+
+$git_path/linux_workstation_build/install_tokyo_nights_theme
+
+cd $current_dir
+
+$git_path/linux_workstation_build/install_web_browser
+
+$git_path/linux_workstation_build/install_steam
+
+$git_path/linux_workstation_build/setup_nfs_drives
+$git_path/linux_workstation_build/install_darktable
+
+echo "Setup is now completed, please reboot your system."

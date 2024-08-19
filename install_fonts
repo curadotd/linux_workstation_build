@@ -95,3 +95,5 @@ else
 fi
 
 fc-cache -vf
+
+echo "Font installation completed."

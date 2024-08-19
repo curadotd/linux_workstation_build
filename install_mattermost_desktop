@@ -68,3 +68,5 @@ if [[ $install_choice =~ ^[Yy]$ ]]; then
 else
     echo "Installation cancelled."
 fi
+
+echo "Mattermost Desktop installation completed."

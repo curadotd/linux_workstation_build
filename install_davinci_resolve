@@ -160,6 +160,7 @@ if [[ $install_resolve =~ ^[Yy]$ ]]; then
     elif [ -f /etc/arch-release ]; then
         echo "Arch Linux detected. Using yay to install DaVinci Resolve..."
         install_arch_davinci
+        echo "DaVinci Resolve installation completed."
     else
         echo "Unsupported Linux distribution. Please install dependencies manually."
         exit 1

@@ -1,7 +1,5 @@
 #!/bin/bash
 
-current_dir=$(pwd)
-
 # Ask user if they want to use Tokyo Nights theme files
 read -p "Do you want to install Tokyo Nights theme? (y/n) " install_tokyo_nights_theme
 
@@ -71,7 +69,5 @@ EOL
 else
     echo "Tokyo Night theme installation skipped."
 fi
-
-cd $current_dir
 
 echo "Script execution completed."

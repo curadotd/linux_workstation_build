@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Detect the Linux distribution
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$NAME
+elif [ -f /etc/lsb-release ]; then
+    . /etc/lsb-release
+    OS=$DISTRIB_ID
+else
+    OS=$(uname -s)
+fi
+
+# Ask user if they want to install Steam
+read -p "Do you want to install Steam? (y/n): " steam_answer
+if [[ $steam_answer == [Yy]* ]]; then
+    echo "Installing Steam..."
+
+    case "$OS" in
+        "Ubuntu" | "Debian")
+            sudo apt install wine64 wine32 libasound2-plugins:i386 libsdl2-2.0-0:i386 libdbus-1-3:i386 \
+            libsqlite3-0:i386
+            sudo apt install steam
+            ;;
+        "Rocky Linux")
+            sudo dnf install https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm
+            sudo dnf install steam wine
+            ;;
+        "Arch Linux")
+            sudo pacman -S --needed steam wine giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap gnutls lib32-gnutls \
+            mpg123 lib32-mpg123 openal lib32-openal v4l-utils lib32-v4l-utils libpulse lib32-libpulse libgpg-error \
+            lib32-libgpg-error alsa-plugins lib32-alsa-plugins alsa-lib lib32-alsa-lib libjpeg-turbo lib32-libjpeg-turbo \
+            sqlite lib32-sqlite libxcomposite lib32-libxcomposite libxinerama lib32-libgcrypt libgcrypt lib32-libxinerama \
+            ncurses lib32-ncurses ocl-icd lib32-ocl-icd libxslt lib32-libxslt libva lib32-libva gtk3 \
+            lib32-gtk3 gst-plugins-base-libs lib32-gst-plugins-base-libs vulkan-icd-loader lib32-vulkan-icd-loader
+            ;;
+        *)
+            echo "Unsupported distribution: $OS"
+            exit 1
+            ;;
+    esac
+
+    echo "Steam installation completed."
+else
+    echo "Steam installation skipped."
+fi
+
+echo "Steam installation process finished."
