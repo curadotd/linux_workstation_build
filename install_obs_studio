@@ -4,9 +4,18 @@ echo "Do you want to install OBS Studio? (y/n)"
 read -r response
 
 if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
-    echo "Installing OBS Studio..."
-    sudo apt update
-    sudo apt install obs-studio ffmpeg
+    echo "Detecting operating system..."
+    if [ -f /etc/debian_version ]; then
+        echo "Debian-based system detected. Installing OBS Studio..."
+        sudo apt update
+        sudo apt install obs-studio ffmpeg
+    elif [ -f /etc/arch-release ]; then
+        echo "Arch Linux detected. Installing OBS Studio..."
+        sudo pacman -Syu obs-studio ffmpeg
+    else
+        echo "Unsupported operating system. Please install OBS Studio manually."
+        exit 1
+    fi
     echo "OBS Studio installation complete."
 else
     echo "OBS Studio installation skipped."
