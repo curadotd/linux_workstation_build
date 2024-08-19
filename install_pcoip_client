@@ -37,7 +37,7 @@ if [[ $install_pciop =~ ^[Yy]$ ]]; then
             
             # Install dependencies
             yay -S --needed openssl-1.1 qt5-graphicaleffects qt5-networkauth qt5-quickcontrols protobuf3.12 \
-            hiredis0.14
+            hiredis0.14 libxkbcommon-x11 libxcb xcb-util-image xcb-util-renderutil mesa
 
             # Build and install
             makepkg -si
