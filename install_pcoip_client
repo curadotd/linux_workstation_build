@@ -3,24 +3,54 @@
 # Ask user if they want to install pciop-client
 read -p "Do you want to install pciop-client, if you need it for remote work? (y/n) " install_pciop
 
+current_dir=$(pwd)
+
 if [[ $install_pciop =~ ^[Yy]$ ]]; then
     echo "Installing pciop-client..."
     # Function to install the latest pcoip-client for Arch Linux
     install_arch() {
+        # Check if yay is installed
         if ! command -v yay &> /dev/null; then
-            sudo pacman -S --needed base-devel git
-            if [ ! -d "$HOME/git" ]; then
-                mkdir "$HOME/git"
-            fi
+            echo "yay could not be found, installing it now..."
+            read -p "Enter the directory to clone into (default: /home/$USER/git): " clone_dir
+            clone_dir=${clone_dir:-/home/$USER/git}
+            mkdir -p "$clone_dir"
+            cd "$clone_dir"
             git clone https://aur.archlinux.org/yay.git
             cd yay
             makepkg -si
-            cd ..
+            cd "$current_dir"
         fi
-        if ! pacman -Qi pcoip-client &> /dev/null; then
-            yay -S pcoip-client
+        read -p "Do you want to clone and update the pcoip-client PKGBUILD? (y/n) " clone_pcoip
+        if [[ $clone_pcoip =~ ^[Yy]$ ]]; then
+            read -p "Enter the directory to clone into (default: /home/$USER/git): " clone_dir
+            clone_dir=${clone_dir:-/home/$USER/git}
+            
+            mkdir -p "$clone_dir"
+            cd "$clone_dir"
+            git clone https://aur.archlinux.org/pcoip-client.git
+            cd pcoip-client
+            
+            # Update PKGBUILD
+            sed -i 's/23.01.1/24.03.4/' PKGBUILD
+            sed -i 's/bbaf1e643e77e239968ec108e9dbee9ade17f47bb4694c8bbf97fdc229a9903f/a069189bcc5cf7c61fae6f7f88f23cc614f8d61535cce781a834c121e8df70bd/' PKGBUILD
+            
+            # Install dependencies
+            yay -S --needed openssl-1.1 qt5-graphicaleffects qt5-networkauth qt5-quickcontrols protobuf3.12 \
+            hiredis0.14
+
+            # Build and install
+            makepkg -si
+
+            # Create a symlink to the pcoip-client binary
+            sudo ln -sf /usr/lib/pcoip-client/pcoip-client /usr/bin/pcoip-client
+            cd "$current_dir"
         else
-            echo "pcoip-client is already installed"
+            if ! pacman -Qi pcoip-client &> /dev/null; then
+                yay -S pcoip-client
+            else
+                echo "pcoip-client is already installed"
+            fi
         fi
     }
 
