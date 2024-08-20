@@ -40,37 +40,57 @@ elif [[ "$OS" == "Arch Linux" ]]; then
 
     sudo alsactl init
 elif [[ "$OS" == "Rocky Linux" ]]; then
-    sudo dnf install dbus-devel gcc git libconfig-devel libdrm-devel libev-devel libX11-devel libX11-xcb \
+    sudo dnf install dbus-devel gcc git libconfig-devel libdrm-devel libev libX11-devel libX11-xcb \
     libXext-devel libxcb-devel libGL-devel libEGL-devel libepoxy-devel meson ninja-build pcre2-devel \
-    pixman-devel uthash-devel xcb-util-image-devel xcb-util-renderutil-devel xorg-x11-proto-devel \
-    xcb-util-devel cmake libxft-devel libimlib2-devel libxinerama-devel libxcb-res0-devel alsa-utils
+    pixman-devel xcb-util-image-devel xcb-util-renderutil-devel xorg-x11-proto-devel \
+    xcb-util-devel cmake libXft-devel imlib2-devel libXinerama-devel libxcb-devel alsa-utils epel-release
     
 else
     echo "Unsupported operating system: $OS"
     exit 1
 fi
 
-$current_dir/linux_workstation_build/install_fonts
+./install_fonts
 
-$current_dir/linux_workstation_build/install_dwm
+# Ask user about desktop environment
+echo "Which desktop environment would you like to install?"
+echo "1) DWM"
+echo "2) MATE"
+echo "3) None"
+read -p "Enter your choice (1/2/3): " de_choice
+
+case $de_choice in
+    1)
+        ./install_dwm
+        ;;
+    2)
+        ./install_mate_desktop
+        ;;
+    3)
+        echo "Skipping desktop environment installation."
+        ;;
+    *)
+        echo "Invalid choice. Skipping desktop environment installation."
+        ;;
+esac
 
 cd $current_dir
 
-$current_dir/linux_workstation_build/install_starship
+./install_starship
 
-$current_dir/linux_workstation_build/install_mattermost_desktop
+./install_mattermost_desktop
 
-$current_dir/linux_workstation_build/clone_dotconfig
+./clone_dotconfig
 
-$current_dir/linux_workstation_build/install_tokyo_nights_theme
+./install_tokyo_nights_theme
 
 cd $current_dir
 
-$current_dir/linux_workstation_build/install_web_browser
+./install_web_browser
 
-$current_dir/linux_workstation_build/install_steam
+./install_steam
 
-$current_dir/linux_workstation_build/setup_nfs_drives
-$current_dir/linux_workstation_build/install_darktable
+./setup_nfs_drives
+./install_darktable
 
 echo "Setup is now completed, please reboot your system."
