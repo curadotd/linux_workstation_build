@@ -5,6 +5,7 @@ if [ -f /etc/os-release ]; then
     . /etc/os-release
     OS=$NAME
 elif type lsb_release >/dev/null 2>&1; then
+    echo lsb_release -si | grep -v "No LSB modules are available." | head -n1
     OS=$(lsb_release -si | grep -v "No LSB modules are available." | head -n1)
 else
     OS=$(uname -s)
