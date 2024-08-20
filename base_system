@@ -40,33 +40,37 @@ elif [[ "$OS" == "Arch Linux" ]]; then
 
     sudo alsactl init
 elif [[ "$OS" == "Rocky Linux" ]]; then
-    sudo dnf install 
+    sudo dnf install dbus-devel gcc git libconfig-devel libdrm-devel libev-devel libX11-devel libX11-xcb \
+    libXext-devel libxcb-devel libGL-devel libEGL-devel libepoxy-devel meson ninja-build pcre2-devel \
+    pixman-devel uthash-devel xcb-util-image-devel xcb-util-renderutil-devel xorg-x11-proto-devel \
+    xcb-util-devel cmake libxft-devel libimlib2-devel libxinerama-devel libxcb-res0-devel alsa-utils
+    
 else
     echo "Unsupported operating system: $OS"
     exit 1
 fi
 
-$git_path/linux_workstation_build/install_fonts
+$current_dir/linux_workstation_build/install_fonts
 
-$git_path/linux_workstation_build/install_dwm
-
-cd $current_dir
-
-$git_path/linux_workstation_build/install_starship
-
-$git_path/linux_workstation_build/install_mattermost_desktop
-
-$git_path/linux_workstation_build/clone_dotconfig
-
-$git_path/linux_workstation_build/install_tokyo_nights_theme
+$current_dir/linux_workstation_build/install_dwm
 
 cd $current_dir
 
-$git_path/linux_workstation_build/install_web_browser
+$current_dir/linux_workstation_build/install_starship
 
-$git_path/linux_workstation_build/install_steam
+$current_dir/linux_workstation_build/install_mattermost_desktop
 
-$git_path/linux_workstation_build/setup_nfs_drives
-$git_path/linux_workstation_build/install_darktable
+$current_dir/linux_workstation_build/clone_dotconfig
+
+$current_dir/linux_workstation_build/install_tokyo_nights_theme
+
+cd $current_dir
+
+$current_dir/linux_workstation_build/install_web_browser
+
+$current_dir/linux_workstation_build/install_steam
+
+$current_dir/linux_workstation_build/setup_nfs_drives
+$current_dir/linux_workstation_build/install_darktable
 
 echo "Setup is now completed, please reboot your system."
