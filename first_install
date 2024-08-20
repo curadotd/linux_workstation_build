@@ -47,7 +47,7 @@ case $OS in
     "Rocky Linux")
         sudo dnf groupinstall "Development Tools"
         install_packages gcc gcc-c++ kernel-devel kernel-headers glibc-devel.i686 libgcc.i686 tar tree \
-        unzip cmake make jq
+        unzip cmake make jq epel-release
         ;;
 esac
 
