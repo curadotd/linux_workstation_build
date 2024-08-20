@@ -45,7 +45,9 @@ case $OS in
         install_packages build-essential dkms linux-headers-amd64 libgl1-mesa-dev pkg-config meson ninja-build
         ;;
     "Rocky Linux")
-        install_packages gcc gcc-c++ kernel-devel kernel-headers
+        install_packages config-manager --set-enabled powertools
+        install_packages gcc gcc-c++ kernel-devel kernel-headers glibc-devel.i686 libgcc.i686 tar tree \
+        multitail tldr trash-cli unzip cmake make jq
         ;;
 esac
 

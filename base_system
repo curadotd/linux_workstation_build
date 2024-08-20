@@ -33,7 +33,6 @@ if [[ "$OS" == "Ubuntu" || "$OS" == "Debian" ]]; then
     libasound2-plugins libasound2-doc alsa-oss alsamixergui apulse alsa-firmware-loaders locate krita gimp \
     qt5ct qt5-style-kvantum fastfetch
 
-    sudo alsactl init
 elif [[ "$OS" == "Arch Linux" ]]; then
     sudo pacman -S --needed tar tree multitail tldr trash-cli unzip make jq lxappearance papirus-icon-theme \
     noto-fonts-emoji lm_sensors thunar xorg-xserver-utils pavucontrol xdg-utils xorg-xinput rofi wget github-cli \
@@ -41,11 +40,7 @@ elif [[ "$OS" == "Arch Linux" ]]; then
 
     sudo alsactl init
 elif [[ "$OS" == "Rocky Linux" ]]; then
-    sudo dnf install tar tree multitail tldr trash-cli unzip make jq lxappearance papirus-icon-theme \
-    google-noto-emoji-fonts lm_sensors thunar xorg-x11-server-utils pavucontrol xdg-utils xorg-x11-xinit-utils rofi wget gh \
-    alsa-plugins alsa-utils alsa-oss apulse alsa-firmware mlocate krita gimp qt5-qtbase qt5ct kvantum fastfetch
-
-    sudo alsactl init
+    sudo dnf install 
 else
     echo "Unsupported operating system: $OS"
     exit 1
