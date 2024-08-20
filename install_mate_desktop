@@ -4,14 +4,15 @@ echo "Do you want to install the MATE desktop environment? (y/n)"
 read -r install_mate
 
 if [[ $install_mate =~ ^[Yy]$ ]]; then
-    # Detect the Linux distribution
+    # Determine the operating system
     if [ -f /etc/os-release ]; then
         . /etc/os-release
         OS=$NAME
+    elif type lsb_release >/dev/null 2>&1; then
+        OS=$(lsb_release -si | grep -v "No LSB modules are available." | head -n1)
     else
-        echo "Unable to detect the operating system. Exiting."
-        exit 1
-    fi
+        OS=$(uname -s)
+    fi  
 
     case $OS in
         "Rocky Linux")
@@ -33,7 +34,7 @@ if [[ $install_mate =~ ^[Yy]$ ]]; then
             
             sudo systemctl set-default graphical.target
             ;;
-        "Debian" | "Ubuntu")
+        "Debian GNU/Linux" | "Ubuntu")
             sudo apt update
             sudo apt install task-mate-desktop
             ;;
