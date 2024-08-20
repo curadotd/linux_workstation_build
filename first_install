@@ -73,7 +73,6 @@ if [[ "$unstable_choice" == "y" ]]; then
         "Rocky Linux")
             echo "Enabling testing repositories for Rocky Linux..."
             sudo dnf config-manager --set-enabled crb
-            sudo dnf config-manager --set-enabled testing
             sudo dnf upgrade
             ;;
     esac

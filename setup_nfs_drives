@@ -61,7 +61,20 @@ if [[ $setup_choice == "F" || $setup_choice == "f" ]]; then
 
 elif [[ $setup_choice == "M" || $setup_choice == "m" ]]; then
     # Create manual mount script
-    script_name="mount_nfs_shares.sh"
+    read -p "Enter the directory where you want to save the mount script: " script_dir
+    
+    # Check if the directory exists
+    if [ ! -d "$script_dir" ]; then
+        read -p "Directory doesn't exist. Do you want to create it? (y/n): " create_dir
+        if [[ $create_dir == "y" || $create_dir == "Y" ]]; then
+            mkdir -p "$script_dir"
+        else
+            echo "Script creation cancelled. Please run the script again with a valid directory."
+            exit 1
+        fi
+    fi
+
+    script_name="$script_dir/mount_nfs_shares"
     echo "#!/bin/bash" > "$script_name"
     chmod +x "$script_name"
 
@@ -76,7 +89,7 @@ elif [[ $setup_choice == "M" || $setup_choice == "m" ]]; then
     done
 
     echo "Manual mount script '$script_name' has been created."
-    echo "You can run it with 'sudo ./$script_name' to mount the shares."
+    echo "You can run it with 'sudo $script_name' to mount the shares."
 else
     echo "Invalid choice. Please run the script again and choose F or M."
     exit 1
