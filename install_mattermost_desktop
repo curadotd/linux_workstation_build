@@ -41,11 +41,9 @@ install_rocky() {
 # Function to install Mattermost Desktop on Debian
 install_debian() {
     if ! dpkg -l | grep mattermost-desktop; then
-        sudo apt-get install mattermost-desktop || {
         curl -fsS -o- https://deb.packages.mattermost.com/setup-repo.sh | sudo bash
         sudo apt update
 	    sudo apt install mattermost-desktop
-        }
     else
         echo "mattermost-desktop is already installed"
     fi
