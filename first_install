@@ -11,6 +11,8 @@ else
     OS=$(uname -s)
 fi
 
+echo $OS this is the dist.
+
 # Function to install packages based on the distribution
 install_packages() {
     case $OS in
