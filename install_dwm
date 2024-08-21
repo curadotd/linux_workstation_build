@@ -74,8 +74,8 @@ if [[ $install_dwm_curado =~ ^[Yy]$ ]]; then
             ;;
         arch)
             install_packages libx11 libxft libimlib2 libxinerama libxcb kitty feh polkit flameshot dunst base-devel \
-            libconfig dbus libev libx11 libxcb libxext libgl libegl libepoxy meson pcre2 pixman uthash xcb-util-image \
-            xcb-util-renderutil xorgproto cmake libxft libimlib2 libxinerama libxcb-res xorg-xev xorg-xbacklight alsa-utils
+            libconfig dbus libev libx11 libxext libgl libegl libepoxy meson pcre2 pixman uthash xcb-util-image \
+            xcb-util-renderutil xorgproto cmake libxft imlib2 libxinerama xcb-util xorg-xev xorg-xbacklight alsa-utils
             ;;
         rocky)
             install_packages libX11-devel libXft-devel imlib2-devel libXinerama-devel libxcb-devel kitty feh polkit \
