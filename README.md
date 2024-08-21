@@ -23,6 +23,16 @@ You can check it is added by running, and you should see sudo.
 groups username	
 ```
 
+For Arch and Rocky, you might want to install git and vim.
+
+Rocky:
+```sh
+sudo dnf install git vim
+```
+Arch:
+```sh
+sudo pacman -S git vim
+```
 
 ```sh
 mkdir $HOME/git
