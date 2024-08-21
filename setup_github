@@ -83,12 +83,12 @@ if ! command_exists gh; then
 fi
 
 # Set up Git user User Name
-read -p "Enter your Git username "Mona Lisa" : git_user
+read -p 'Enter your Git username "Mona Lisa"' : git_user
 git config --global user.name "$git_user"
 echo "Git username set to: $git_user"
 
 # Set up Git user email
-read -p "Enter your Git user email "YOUR_EMAIL " : git_email
+read -p 'Enter your Git user email "YOUR_EMAIL"' : git_email
 git config --global user.email "$git_email"
 echo "Git user email set to: $git_email"
 
