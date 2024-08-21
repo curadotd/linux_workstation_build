@@ -36,7 +36,7 @@ if [[ "$OS" == "Ubuntu" || "$OS" == "Debian GNU/Linux" ]]; then
 elif [[ "$OS" == "Arch Linux" ]]; then
     sudo pacman -S --needed tar tree tldr trash-cli unzip make jq lxappearance papirus-icon-theme \
     noto-fonts-emoji lm_sensors thunar xorg-apps pavucontrol xdg-utils xorg-xinput rofi wget github-cli \
-    alsa-plugins alsa-utils alsa-oss alsa-firmware mlocate krita gimp qt5ct kvantum-qt5 fastfetch
+    alsa-plugins alsa-utils alsa-oss alsa-firmware mlocate krita gimp qt5ct kvantum-qt5 fastfetch openssh
 
 elif [[ "$OS" == "Rocky Linux" ]]; then
     sudo dnf install tar tree tldr trash-cli dbus-devel gcc git libconfig-devel libdrm-devel libev \
