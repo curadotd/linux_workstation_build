@@ -23,16 +23,16 @@ install_gh() {
     distro=$(detect_distro)
     case $distro in
         arch)
-            sudo pacman -Sy --needed github-cli
+            sudo pacman -Sy --needed github-cli vim
             ;;
         debian)
             curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
             echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-            sudo apt update && sudo apt install gh
+            sudo apt update && sudo apt install gh vim
             ;;
         rocky)
             sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
-            sudo dnf install gh
+            sudo dnf install gh vim
             ;;
         *)
             echo "Unsupported distribution. Please install GitHub CLI manually and run this script again."
@@ -91,6 +91,9 @@ echo "Git username set to: $git_user"
 read -p 'Enter your Git user email "YOUR_EMAIL" :' git_email
 git config --global user.email "$git_email"
 echo "Git user email set to: $git_email"
+
+# use vim as the code editor
+git config --global core.editor "vim"
 
 # Log in with GitHub CLI
 echo "Logging in to GitHub with gh CLI..."
