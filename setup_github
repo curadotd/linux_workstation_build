@@ -1,0 +1,99 @@
+#!/bin/bash
+
+# Function to check if a command is available
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Function to detect the Linux distribution
+detect_distro() {
+    if [ -f /etc/arch-release ]; then
+        echo "arch"
+    elif [ -f /etc/debian_version ]; then
+        echo "debian"
+    elif [ -f /etc/rocky-release ]; then
+        echo "rocky"
+    else
+        echo "unknown"
+    fi
+}
+
+# Function to install gh CLI
+install_gh() {
+    distro=$(detect_distro)
+    case $distro in
+        arch)
+            sudo pacman -Sy --needed github-cli
+            ;;
+        debian)
+            curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+            sudo apt update && sudo apt install gh
+            ;;
+        rocky)
+            sudo dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+            sudo dnf install gh
+            ;;
+        *)
+            echo "Unsupported distribution. Please install GitHub CLI manually and run this script again."
+            exit 1
+            ;;
+    esac
+}
+
+# Check if git is installed, if not, install it
+if ! command_exists git; then
+    echo "Git is not installed. Attempting to install Git..."
+    distro=$(detect_distro)
+    case $distro in
+        arch)
+            sudo pacman -Sy --needed git
+            ;;
+        debian)
+            sudo apt update && sudo apt install git
+            ;;
+        rocky)
+            sudo dnf install git
+            ;;
+        *)
+            echo "Unsupported distribution. Please install Git manually and run this script again."
+            exit 1
+            ;;
+    esac
+    
+    if command_exists git; then
+        echo "Git has been successfully installed."
+    else
+        echo "Failed to install Git. Please install it manually and run this script again."
+        exit 1
+    fi
+fi
+
+# Check if gh is installed, if not, install it
+if ! command_exists gh; then
+    echo "GitHub CLI (gh) is not installed. Attempting to install GitHub CLI..."
+    install_gh
+    
+    if command_exists gh; then
+        echo "GitHub CLI has been successfully installed."
+    else
+        echo "Failed to install GitHub CLI. Please install it manually and run this script again."
+        exit 1
+    fi
+fi
+
+# Set up Git user User Name
+read -p "Enter your Git username "Mona Lisa": " git_user
+git config --global user.name "$git_user"
+echo "Git username set to: $git_user"
+
+# Set up Git user email
+read -p "Enter your Git user email: "YOUR_EMAIL"" git_email
+git config --global user.email "$git_email"
+echo "Git user email set to: $git_email"
+
+# Log in with GitHub CLI
+echo "Logging in to GitHub with gh CLI..."
+gh auth login
+
+echo "Git and GitHub setup complete!"

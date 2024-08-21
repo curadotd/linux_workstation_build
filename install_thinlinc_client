@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# Function to detect the Linux distribution
+detect_distro() {
+    if [ -f /etc/debian_version ]; then
+        echo "debian"
+    elif [ -f /etc/redhat-release ]; then
+        echo "rocky"
+    elif [ -f /etc/arch-release ]; then
+        echo "arch"
+    else
+        echo "unknown"
+    fi
+}
+
+# Detect the distribution
+DISTRO=$(detect_distro)
+
+# Set the download URL and filename based on the distribution
+case $DISTRO in
+    debian)
+        FILE="thinlinc-client_*_amd64.deb"
+        URL="https://www.cendio.com/downloads/clients/$FILE"
+        ;;
+    rocky)
+        FILE="thinlinc-client-*.x86_64.rpm"
+        URL="https://www.cendio.com/downloads/clients/$FILE"
+        ;;
+    arch)
+        FILE="tl-*-client-linux-dynamic-x86_64.tar.gz"
+        URL="https://www.cendio.com/downloads/clients/$FILE"
+        ;;
+    *)
+        echo "Unsupported distribution. Exiting."
+        exit 1
+        ;;
+esac
+
+# Ask the user to download the file
+echo "Please download the ThinLinc client file from:"
+echo "$URL"
+echo "and save it to your $HOME/Downloads folder."
+echo "Press Enter when you have completed this step."
+read -p ""
+
+# Check if the file exists
+if [ -z "$(ls $HOME/Downloads/$FILE 2>/dev/null)" ]; then
+    echo "File not found in $HOME/Downloads. Exiting."
+    exit 1
+fi
+
+# Set the actual filename for later use
+ACTUAL_FILE=$(ls $HOME/Downloads/$FILE | head -n 1)
+
+# Install the ThinLinc client based on the distribution
+case $DISTRO in
+    debian)
+        sudo dpkg -i "$ACTUAL_FILE"
+        sudo apt-get install -f  # Install any missing dependencies
+        ;;
+    rocky)
+        sudo rpm -ivh "$ACTUAL_FILE"
+        ;;
+    arch)
+        sudo mkdir -p /opt/thinlinc_client
+        sudo tar -xzf "$ACTUAL_FILE" -C /opt/thinlinc_client --strip-components=1
+        # Create a desktop entry
+        cat << EOF > ~/.local/share/applications/thinlinc_client.desktop
+[Desktop Entry]
+Name=ThinlincClient
+Exec=/opt/thinlinc_client/bin/tlclient
+Icon=/opt/thinlinc_client/lib/tlclient/thinlinc_16.png
+Type=Application
+Categories=Development;
+EOF
+        ;;
+esac
+
+echo "ThinLinc client installation completed."
