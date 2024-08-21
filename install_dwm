@@ -26,7 +26,7 @@ install_packages() {
             sudo apt install "$@"
             ;;
         arch)
-            sudo pacman -S --needed "$@"
+            sudo pacman -S "$@"
             ;;
         rocky)
             sudo dnf install "$@"
