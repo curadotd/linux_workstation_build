@@ -26,7 +26,7 @@ install_packages() {
             sudo apt install "$@"
             ;;
         arch)
-            sudo pacman -S "$@"
+            sudo pacman -S --needed "$@"
             ;;
         rocky)
             sudo dnf install "$@"
@@ -75,7 +75,8 @@ if [[ $install_dwm_curado =~ ^[Yy]$ ]]; then
         arch)
             install_packages libx11 libxft libxinerama libxcb kitty feh mate-polkit flameshot dunst base-devel \
             libconfig dbus libev libx11 libxext libgl libegl libepoxy meson pcre2 pixman uthash xcb-util-image \
-            xcb-util-renderutil xorgproto cmake libxft imlib2 libxinerama xcb-util xorg-xev xorg-xbacklight alsa-utils
+            xcb-util-renderutil xorgproto cmake libxft imlib2 libxinerama xcb-util xorg-xev xorg-xbacklight \
+            alsa-utils feh
             ;;
         rocky)
             install_packages libX11-devel libXft-devel imlib2-devel libXinerama-devel libxcb-devel kitty feh polkit \
