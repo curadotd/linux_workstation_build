@@ -33,7 +33,7 @@ install_arch_davinci() {
             exit 1
         fi
     fi
-    yay -S davinci-resolve
+    yay -S davinci-resolve log4cxx
 }
 
 # Function to install graphics drivers and dependencies for Debian-based systems
