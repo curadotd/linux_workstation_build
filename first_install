@@ -39,7 +39,7 @@ install_packages() {
 # Install development tools and other necessary packages
 case $OS in
     "Arch Linux")
-        install_packages base-devel linux-headers os-prober
+        install_packages base-devel linux-headers os-prober inetutils
         ;;
     "Debian GNU/Linux" | "Ubuntu")
         install_packages build-essential dkms linux-headers-amd64 libgl1-mesa-dev pkg-config meson ninja-build
