@@ -38,16 +38,16 @@ if [[ $install_pciop =~ ^[Yy]$ ]]; then
         sed -i 's/23.01.1/24.03.4/' PKGBUILD
         sed -i 's/bbaf1e643e77e239968ec108e9dbee9ade17f47bb4694c8bbf97fdc229a9903f/a069189bcc5cf7c61fae6f7f88f23cc614f8d61535cce781a834c121e8df70bd/' PKGBUILD
         
-        # Add the new line to PKGBUILD
-        sed -i '/rm -rf $pkgdir\/usr\/libexec/a\  sudo ln -sf /usr/lib/pcoip-client/pcoip-client /usr/bin/pcoip-client' PKGBUILD
-        
         # Install dependencies
         yay -S --needed openssl-1.1 qt5-graphicaleffects qt5-networkauth qt5-quickcontrols protobuf3.12 \
         hiredis0.14 libxkbcommon-x11 libxcb xcb-util-image xcb-util-renderutil mesa
         # Build and install
         makepkg -si
+        sudo setcap "cap_setgid+i" "/usr/lib/pcoip-client/usb-helper"
+        sudo setcap "cap_setgid+i" "/usr/lib/pcoip-client/pcoip-client"
         # Create a symlink to the pcoip-client binary
         sudo ln -sf /usr/lib/pcoip-client/pcoip-client /usr/bin/pcoip-client
+
         cd "$current_dir"
     }
 
