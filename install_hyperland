@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# Function to check if a command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Detect the Linux distribution
+if command_exists dnf; then
+    DISTRO="rocky"
+elif command_exists apt-get; then
+    DISTRO="debian"
+elif command_exists pacman; then
+    DISTRO="arch"
+else
+    echo "Unsupported distribution. This script works for Rocky Linux, Debian, and Arch Linux."
+    exit 1
+fi
+
+# Install Hyprland and SDDM based on the detected distribution
+case $DISTRO in
+    rocky)
+        echo "Installing Hyprland and SDDM on Rocky Linux..."
+        sudo dnf copr enable solopasha/hyprland
+        sudo dnf install hyprland sddm
+        ;;
+    debian)
+        echo "Installing Hyprland and SDDM on Debian..."
+        sudo apt update
+        sudo apt install meson wget build-essential ninja-build cmake-extras cmake gettext gettext-base fontconfig \
+        libfontconfig-dev libffi-dev libxml2-dev libdrm-dev libxkbcommon-x11-dev libxkbregistry-dev libxkbcommon-dev \
+        libpixman-1-dev libudev-dev libseat-dev seatd libxcb-dri3-dev libvulkan-dev libvulkan-volk-dev vulkan-validationlayers-dev \
+        libvkfft-dev libgulkan-dev libegl-dev libgles2 libegl1-mesa-dev glslang-tools libinput-bin libinput-dev libxcb-composite0-dev \
+        libavutil-dev libavcodec-dev libavformat-dev libxcb-ewmh2 libxcb-ewmh-dev libxcb-present-dev libxcb-icccm4-dev \
+        libxcb-render-util0-dev libxcb-res0-dev libxcb-xinput-dev sddm
+
+        current_dir=$(pwd)
+        # Check if GIT_PATH is already set
+        if [ -z "$GIT_PATH" ]; then
+            read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
+            if [[ $create_git_dir =~ ^[Yy]$ ]]; then
+                read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+                GIT_PATH=$git_path
+                export GIT_PATH
+                
+                if [ ! -d "$GIT_PATH" ]; then
+                    mkdir -p "$GIT_PATH"
+                    echo "Created git directory at $GIT_PATH"
+                else
+                    echo "Git directory already exists at $GIT_PATH"
+                fi
+            else
+                echo "Skipping git directory creation."
+            fi
+        else
+            echo "GIT_PATH is already set to $GIT_PATH"
+        fi
+
+        cd $GIT_PATH
+        git clone https://github.com/hyprwm/Hyprland
+        cd Hyprland
+        sudo make install
+        cd $current_dir
+        ;;
+    arch)
+        echo "Installing Hyprland, SDDM, and other packages on Arch Linux..."
+        sudo pacman -S --needed hyprland xdg-desktop-portal-hyprland xorg-xwayland qt5-wayland qt6-wayland qt5ct libva \
+        ttf-firacode-nerd neofetch nwg-look rofi qt5ct kitty jq lm_sensors gtk3 gtk4 xdg-desktop-portal \
+        polkit-kde ffmpeg ffmpegthumbs dunst btop thunar thunar-archive-plugin pamixer networkmanager gedit mattermost-desktop \
+        mlocate strace xorg-xhost cmake starship openrgb i2c-tools krita krita-plugin-gmic htop lxappearance pavucontrol wl-clipboard \
+        waybar otf-font-awesome ttf-font-awesome imagemagick wl-clipboard blueman cliphist shotwell sddm
+
+        ./install_yay
+
+        yay -S --needed sddm-theme-tokyo-night tela-icon-themenordzy-icon-theme otf-sora swaylock-effects \
+        ttf-comfortaa ttf-icomoon-feather wlogout wlr-randr ttf-icomoon-feather hyprpicker grimblast-git
+        ;;
+esac
+
+echo "Hyprland and SDDM installation completed."

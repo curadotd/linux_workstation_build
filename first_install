@@ -39,7 +39,9 @@ install_packages() {
 # Install development tools and other necessary packages
 case $OS in
     "Arch Linux")
-        install_packages base-devel linux-headers os-prober inetutils
+        install_packages base-devel linux-headers os-prober inetutils bluez bluez-utils
+
+        sudo systemctl enable bluetooth
         ;;
     "Debian GNU/Linux" | "Ubuntu")
         install_packages build-essential dkms linux-headers-amd64 libgl1-mesa-dev pkg-config meson ninja-build
@@ -91,6 +93,20 @@ if [[ $install_drivers =~ ^[Yy]$ ]]; then
         case $OS in
             "Arch Linux")
                 install_packages nvidia nvidia-utils lib32-nvidia-utils nvidia-settings cuda
+                
+                # Add NVIDIA modules to mkinitcpio.conf
+                if ! grep -q "nvidia nvidia_modeset nvidia_uvm nvidia_drm" /etc/mkinitcpio.conf; then
+                    sudo sed -i 's/MODULES=(/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm /' /etc/mkinitcpio.conf
+                    echo "NVIDIA modules added to /etc/mkinitcpio.conf"
+                else
+                    echo "NVIDIA modules already present in /etc/mkinitcpio.conf"
+                fi
+
+                # Create or update /etc/modprobe.d/nvidia.conf
+                echo "options nvidia_drm modeset=1 fbdev=1" | sudo tee /etc/modprobe.d/nvidia.conf
+                echo "NVIDIA options added to /etc/modprobe.d/nvidia.conf"
+
+                sudo mkinitcpio -P
                 ;;
             "Debian GNU/Linux" | "Ubuntu")
                 sudo apt update
@@ -98,10 +114,38 @@ if [[ $install_drivers =~ ^[Yy]$ ]]; then
                 sudo dpkg --add-architecture i386 && sudo apt update
                 sudo apt install nvidia-driver-libs nvidia-driver-libs:i386
                 sudo apt install nvidia-cuda-dev nvidia-cuda-toolkit
+
+                # Add NVIDIA modules to /etc/modules
+                if ! grep -q "nvidia nvidia_modeset nvidia_uvm nvidia_drm" /etc/modules; then
+                    echo -e "nvidia\nnvidia_modeset\nnvidia_uvm\nnvidia_drm" | sudo tee -a /etc/modules
+                    echo "NVIDIA modules added to /etc/modules"
+                else
+                    echo "NVIDIA modules already present in /etc/modules"
+                fi
+
+                # Create or update /etc/modprobe.d/nvidia.conf
+                echo "options nvidia_drm modeset=1 fbdev=1" | sudo tee /etc/modprobe.d/nvidia.conf
+                echo "NVIDIA options added to /etc/modprobe.d/nvidia.conf"
+
+                sudo update-initramfs -u
                 ;;
             "Rocky Linux")
                 sudo dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo
                 sudo dnf install nvidia-driver nvidia-settings cuda
+
+                # Add NVIDIA modules to /etc/modules-load.d/nvidia.conf
+                if [ ! -f /etc/modules-load.d/nvidia.conf ] || ! grep -q "nvidia nvidia_modeset nvidia_uvm nvidia_drm" /etc/modules-load.d/nvidia.conf; then
+                    echo -e "nvidia\nnvidia_modeset\nnvidia_uvm\nnvidia_drm" | sudo tee /etc/modules-load.d/nvidia.conf
+                    echo "NVIDIA modules added to /etc/modules-load.d/nvidia.conf"
+                else
+                    echo "NVIDIA modules already present in /etc/modules-load.d/nvidia.conf"
+                fi
+
+                # Create or update /etc/modprobe.d/nvidia.conf
+                echo "options nvidia_drm modeset=1 fbdev=1" | sudo tee /etc/modprobe.d/nvidia.conf
+                echo "NVIDIA options added to /etc/modprobe.d/nvidia.conf"
+
+                sudo dracut --force
                 ;;
         esac
     elif lspci | grep -i amd > /dev/null; then
