@@ -39,7 +39,8 @@ if [[ $use_dotconfig =~ ^[Yy]$ ]]; then
     echo "Cloning dotconfig repository..."
     git clone https://github.com/curadotd/dotconfig.git $GIT_PATH/dotconfig
 
-    cd $git_path/dotconfig
+    cd $GIT_PATH/dotconfig
+    cp bashrc $HOME/.bashrc
     cp -R dunst $HOME/.config/
     cp -R kitty $HOME/.config/
     cp -R MangoHud $HOME/.config/
