@@ -23,6 +23,7 @@ case $DISTRO in
         echo "Installing Hyprland and SDDM on Rocky Linux..."
         sudo dnf copr enable solopasha/hyprland
         sudo dnf install hyprland sddm
+        sudo systemctl enable sddm
         ;;
     debian)
         echo "Installing Hyprland and SDDM on Debian..."
@@ -33,6 +34,8 @@ case $DISTRO in
         libvkfft-dev libgulkan-dev libegl-dev libgles2 libegl1-mesa-dev glslang-tools libinput-bin libinput-dev libxcb-composite0-dev \
         libavutil-dev libavcodec-dev libavformat-dev libxcb-ewmh2 libxcb-ewmh-dev libxcb-present-dev libxcb-icccm4-dev \
         libxcb-render-util0-dev libxcb-res0-dev libxcb-xinput-dev sddm
+
+        sudo systemctl enable sddm
 
         current_dir=$(pwd)
         # Check if GIT_PATH is already set
@@ -74,6 +77,8 @@ case $DISTRO in
 
         yay -S --needed sddm-theme-tokyo-night tela-icon-themenordzy-icon-theme otf-sora swaylock-effects \
         ttf-comfortaa ttf-icomoon-feather wlogout wlr-randr ttf-icomoon-feather hyprpicker grimblast-git
+
+        sudo systemctl enable sddm
         ;;
 esac
 
