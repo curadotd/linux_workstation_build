@@ -33,6 +33,17 @@ if [[ $steam_answer == [Yy]* ]]; then
             sqlite lib32-sqlite libxcomposite lib32-libxcomposite libxinerama lib32-libgcrypt libgcrypt lib32-libxinerama \
             ncurses lib32-ncurses ocl-icd lib32-ocl-icd libxslt lib32-libxslt libva lib32-libva gtk3 gamemode lib32-gamemode\
             lib32-gtk3 gst-plugins-base-libs lib32-gst-plugins-base-libs vulkan-icd-loader lib32-vulkan-icd-loader mangohud
+
+            sudo usermod -aG gamemode $user
+            # Create /etc/profile.d/gaming.sh if it doesn't exist
+            if [ ! -f /etc/profile.d/gaming.sh ]; then
+                echo "Creating /etc/profile.d/gaming.sh and setting MANGOHUD=1"
+                sudo bash -c 'echo "export MANGOHUD=1" > /etc/profile.d/gaming.sh'
+                sudo chmod 644 /etc/profile.d/gaming.sh
+            else
+                echo "/etc/profile.d/gaming.sh already exists. Skipping creation."
+            fi
+            
             ;;
         *)
             echo "Unsupported distribution: $OS"
@@ -46,3 +57,75 @@ else
 fi
 
 echo "Steam installation process finished."
+
+# Ask user if they want to install Gamescope
+read -p "Do you want to install Gamescope? (y/n): " gamescope_answer
+if [[ $gamescope_answer == [Yy]* ]]; then
+    echo "Installing Gamescope..."
+
+    case "$OS" in
+        "Ubuntu" | "Debian")
+            sudo apt install gamescope
+            ;;
+        "Rocky Linux")
+            sudo dnf install gamescope
+            ;;
+        "Arch Linux")
+            sudo pacman -S --needed gamescope
+            ;;
+        *)
+            echo "Unsupported distribution for Gamescope installation: $OS"
+            exit 1
+            ;;
+    esac
+
+    # Check if LightDM is installed and running
+    if systemctl is-active --quiet lightdm; then
+        echo "Removing LightDM and its service..."
+        sudo systemctl stop lightdm
+        sudo systemctl disable lightdm
+        sudo apt remove lightdm || sudo dnf remove lightdm || sudo pacman -R lightdm
+    fi
+
+    # Install and enable SDDM
+    echo "Installing and enabling SDDM..."
+    case "$OS" in
+        "Ubuntu" | "Debian")
+            sudo apt install sddm
+            ;;
+        "Rocky Linux")
+            sudo dnf install sddm
+            ;;
+        "Arch Linux")
+            sudo pacman -S --needed sddm
+            ;;
+    esac
+    sudo systemctl enable sddm
+
+    # Create Gamescope Wayland session file
+    echo "Creating Gamescope Wayland session file..."
+    sudo mkdir -p /usr/share/wayland-sessions
+    sudo tee /usr/share/wayland-sessions/gamescope.desktop > /dev/null << EOL
+[Desktop Entry]
+Encoding=UTF-8
+Name=gamescope
+Comment=GPU accelerated nested compositor
+Exec=gamescope -f -- steam -gamepadui
+Type=Application
+EOL
+
+    # Create SDDM autologin configuration
+    echo "Creating SDDM autologin configuration..."
+    sudo mkdir -p /etc/sddm.conf.d
+    sudo tee /etc/sddm.conf.d/autologin.conf > /dev/null << EOL
+[Autologin]
+User=$USER
+Session=gamescope
+EOL
+
+    echo "Gamescope installation and configuration completed."
+else
+    echo "Gamescope installation skipped."
+fi
+
+echo "Installation process finished."
