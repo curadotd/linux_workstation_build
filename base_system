@@ -120,21 +120,4 @@ cd $current_dir
 
 cd $current_dir
 
-# Ask user if they want to install onboard
-read -p "Do you want to install onboard (on-screen keyboard)? (y/n) " install_onboard
-if [[ $install_onboard =~ ^[Yy]$ ]]; then
-    echo "Installing onboard..."
-    if [[ "$OS" == "Ubuntu" || "$OS" == "Debian GNU/Linux" ]]; then
-        sudo apt install onboard
-    elif [[ "$OS" == "Arch Linux" ]]; then
-        sudo pacman -S --needed onboard
-    elif [[ "$OS" == "Rocky Linux" ]]; then
-        sudo dnf install onboard
-    else
-        echo "Unsupported operating system for onboard installation: $OS"
-    fi
-else
-    echo "Skipping onboard installation."
-fi
-
 echo "Setup is now completed, please reboot your system."
