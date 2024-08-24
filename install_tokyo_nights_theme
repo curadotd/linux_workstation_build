@@ -1,41 +1,43 @@
 #!/bin/bash
 
+current_dir=$(pwd)
+
 # Ask user if they want to use Tokyo Nights theme files
-read -p "Do you want to install Tokyo Nights theme? (y/n) " install_tokyo_nights_theme
-
-# Ask user to create a default git location
-read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
-if [[ $create_git_dir =~ ^[Yy]$ ]]; then
-    read -p "Enter the path for git repositories (default: $HOME/git): " git_path
-    git_path=${git_path:-$HOME/git}
-    
-    if [ ! -d "$git_path" ]; then
-        mkdir -p "$git_path"
-        echo "Created git directory at $git_path"
+echo "Do you want to install Tokyo Nights theme? (y/n)?"
+read -r response
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    # Check if GIT_PATH is already set
+    if [ -z "$GIT_PATH" ]; then
+        read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
+        if [[ $create_git_dir =~ ^[Yy]$ ]]; then
+            read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+            GIT_PATH=$git_path
+            export GIT_PATH
+            
+            if [ ! -d "$GIT_PATH" ]; then
+                mkdir -p "$GIT_PATH"
+                echo "Created git directory at $GIT_PATH"
+            else
+                echo "Git directory already exists at $GIT_PATH"
+            fi
+        else
+            echo "Skipping git directory creation."
+        fi
     else
-        echo "Git directory already exists at $git_path"
+        echo "GIT_PATH is already set to $GIT_PATH"
     fi
-    
-    # Export the git path to use later in the script
-    export GIT_PATH="$git_path"
-else
-    echo "Skipping git directory creation."
-fi
 
-# Ask user if they want to install Tokyo Night theme
-read -p "Do you want to install the Tokyo Night theme? (y/n): " theme_answer
-if [[ $theme_answer == [Yy]* ]]; then
     echo "Installing Tokyo Night theme..."
-    
+        
     # Check if Tokyo-Night-Linux directory already exists
-    if [ ! -d "$git_path/Tokyo-Night-Linux" ]; then
-        git clone https://github.com/stronk-dev/Tokyo-Night-Linux.git $git_path/Tokyo-Night-Linux
+    if [ ! -d "$GIT_PATH/Tokyo-Night-Linux" ]; then
+        git clone https://github.com/stronk-dev/Tokyo-Night-Linux.git $GIT_PATH/Tokyo-Night-Linux
     else
         echo "Tokyo-Night-Linux directory already exists. Skipping clone."
     fi
-    
+        
     cd $git_path/Tokyo-Night-Linux
-    
+        
     # Check if TokyoNight theme directory exists before copying
     if [ ! -d "/usr/share/themes/TokyoNight" ]; then
         sudo cp -R usr/share/themes/TokyoNight /usr/share/themes/
@@ -56,18 +58,40 @@ EOL
         echo "qt5ct color scheme file already exists. Skipping creation."
     fi
 
-    # Create qt5ct.conf if it doesn't exist
-    if [ ! -f "/etc/environment.d/qt5ct.conf" ]; then
-        sudo tee /etc/environment.d/qt5ct.conf > /dev/null << EOL
-QT_QPA_PLATFORMTHEME=qt5ct
-EOL
+    # Determine the correct location for qt.conf
+    if [ -f "/etc/arch-release" ]; then
+        qt_conf_path="/etc/profile.d/qt.sh"
     else
-        echo "qt5ct.conf already exists. Skipping creation."
+        qt_conf_path="/etc/environment.d/qt.conf"
     fi
-    
-    echo "Tokyo Night theme and qt5ct color scheme installed. Please follow the theme's documentation for activation."
+
+    # Create qt.conf if it doesn't exist
+    if [ ! -f "$qt_conf_path" ]; then
+        if [ "$qt_conf_path" = "/etc/profile.d/qt.sh" ]; then
+            sudo tee "$qt_conf_path" > /dev/null << EOL
+export QT_QPA_PLATFORMTHEME=qt5ct
+export QT_PLUGIN_PATH="/usr/lib/qt/plugins:$QT_PLUGIN_PATH"
+export QT_QPA_PLATFORM="xcb"
+export QT_STYLE_OVERRIDE="kvantum"
+export QT_AUTO_SCREEN_SCALE_FACTOR=1
+EOL
+        else
+            sudo tee "$qt_conf_path" > /dev/null << EOL
+QT_QPA_PLATFORMTHEME=qt5ct
+QT_PLUGIN_PATH="/usr/lib/qt/plugins:$QT_PLUGIN_PATH"
+QT_QPA_PLATFORM="xcb"
+QT_STYLE_OVERRIDE="kvantum"
+QT_AUTO_SCREEN_SCALE_FACTOR=1
+EOL
+        fi
+        echo "Created $qt_conf_path"
+    else
+        echo "$(basename "$qt_conf_path") already exists. Skipping creation."
+    fi
+        
+    echo "Tokyo Night theme and qt color scheme installed. Please follow the theme's documentation for activation."
+    cd $current_dir
+    echo "Script execution completed."
 else
     echo "Tokyo Night theme installation skipped."
 fi
-
-echo "Script execution completed."

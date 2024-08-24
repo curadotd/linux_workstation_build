@@ -11,29 +11,18 @@ install_rocky_dependencies() {
     sudo dnf install openssl ocl-icd-devel fakeroot xorriso
 }
 
-# Function to install yay on Arch Linux
-install_yay() {
-    echo "Installing yay..."
-    sudo pacman -S --needed git base-devel
-    git clone https://aur.archlinux.org/yay.git
-    cd yay
-    makepkg -si --noconfirm
-    cd ..
-    rm -rf yay
-}
-
 # Function to install DaVinci Resolve on Arch Linux
 install_arch_davinci() {
     if ! command -v yay &> /dev/null; then
         read -p "yay is not installed. Do you want to install it? (y/n): " install_yay
         if [[ $install_yay =~ ^[Yy]$ ]]; then
-            install_yay
+            ./install_yay
         else
             echo "yay is required to install DaVinci Resolve on Arch Linux. Exiting."
             exit 1
         fi
     fi
-    yay -S davinci-resolve log4cxx
+    yay -S davinci-resolve log4cxx --needed
 }
 
 # Function to install graphics drivers and dependencies for Debian-based systems
@@ -86,9 +75,9 @@ read -p "Do you want to install DaVinci Resolve for Linux? (y/n): " install_reso
 
 if [[ $install_resolve =~ ^[Yy]$ ]]; then
     # Detect the Linux distribution
-    if [ -f /etc/debian_version ] || [ -f /etc/lsb-release ] || [ -f /etc/rocky-release ]; then
-        if [ -f /etc/debian_version ] || [ -f /etc/lsb-release ]; then
-            echo "Debian-based system detected (e.g., Debian, Ubuntu). Installing dependencies..."
+    if [ -f /etc/debian_version ]; then
+        if [ -f /etc/debian_version ]; then
+            echo "Debian system detected. Installing dependencies..."
             install_debian_dependencies
             echo "Please select your GPU type (nvidia/amd/intel):"
             read gpu_type
@@ -124,13 +113,13 @@ if [[ $install_resolve =~ ^[Yy]$ ]]; then
 
         echo "Running the installer..."
         chmod +x "$run_file"
-        if [ -f /etc/debian_version ] || [ -f /etc/lsb-release ]; then
+        if [ -f /etc/debian_version ]; then
             sudo SKIP_PACKAGE_CHECK=1 ./$run_file
         else
             sudo ./$run_file
         fi
 
-        if [ -f /etc/debian_version ] || [ -f /etc/lsb-release ]; then
+        if [ -f /etc/debian_version ]; then
             echo "Fixing dependencies for Debian-based system..."
             # Array with library names
             libraries=(

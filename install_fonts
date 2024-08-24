@@ -5,34 +5,10 @@ if [ ! -d "$FONTS_HOME" ]; then
     mkdir -p "$FONTS_HOME"
 fi
 
+current_dir=$(pwd)
+
 install_fonts_arch() {
-    if ! command -v yay &> /dev/null; then
-        sudo pacman -S --needed base-devel git
-        if [ ! -d "$HOME/git" ]; then
-            mkdir "$HOME/git"
-        fi
-        git clone https://aur.archlinux.org/yay.git
-        cd yay
-        makepkg -si
-        cd ..
-    fi
-    if ! yay -Qs nerd-fonts-fira-code > /dev/null; then
-        yay ttf-fira-code
-    else
-        echo "FiraCode is already installed via yay"
-    fi
-
-    if ! yay -Qs nerd-fonts-meslo > /dev/null; then
-        yay ttf-meslo-nerd
-    else
-        echo "Meslo is already installed via yay"
-    fi
-
-    if ! yay -Qs ttf-font-awesome > /dev/null; then
-        yay ttf-font-awesome
-    else
-        echo "FontAwesome is already installed via yay"
-    fi
+    sudo pacman -S ttf-fira-code ttf-meslo-nerd ttf-font-awesome --needed
 }
 
 install_fonts_manual() {
@@ -80,20 +56,21 @@ read -p "Do you want to install fonts? (y/n): " install_fonts
 if [ "$install_fonts" = "y" ] || [ "$install_fonts" = "Y" ]; then
     if [ -f /etc/arch-release ]; then
         install_fonts_arch
+        fc-cache -vf
     elif [ -f /etc/rocky-release ]; then
         install_fonts_rocky
         install_fonts_manual
+        fc-cache -vf
     elif [ -f /etc/debian_version ]; then
         install_fonts_debian    
         install_fonts_manual
+        fc-cache -vf
     else
         echo "Unsupported OS"
     fi
-    fc-cache -vf
 else
     echo "Font installation skipped."
+    exit 0
 fi
-
-fc-cache -vf
 
 echo "Font installation completed."

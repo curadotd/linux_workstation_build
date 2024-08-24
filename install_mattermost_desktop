@@ -8,18 +8,8 @@ get_latest_release_url() {
 
 # Function to install Mattermost Desktop on Arch Linux
 install_arch() {
-    if ! command -v yay &> /dev/null; then
-        sudo pacman -S --needed base-devel git
-        if [ ! -d "$HOME/git" ]; then
-            mkdir "$HOME/git"
-        fi
-        git clone https://aur.archlinux.org/yay.git
-        cd yay
-        makepkg -si
-        cd ..
-    fi
     if ! pacman -Qi mattermost-desktop &> /dev/null; then
-        yay mattermost-desktop
+        sudo pacman -S mattermost-desktop --needed
     else
         echo "mattermost-desktop is already installed"
     fi

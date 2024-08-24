@@ -19,10 +19,33 @@ get_distro() {
 # Detect the distribution
 DISTRO=$(get_distro)
 
+get_git_path() {
+    # Check if GIT_PATH is already set
+    if [ -z "$GIT_PATH" ]; then
+        read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
+        if [[ $create_git_dir =~ ^[Yy]$ ]]; then
+            read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+            GIT_PATH=$git_path
+            export GIT_PATH
+            
+            if [ ! -d "$GIT_PATH" ]; then
+                mkdir -p "$GIT_PATH"
+                echo "Created git directory at $GIT_PATH"
+            else
+                echo "Git directory already exists at $GIT_PATH"
+            fi
+        else
+            echo "Skipping git directory creation."
+        fi
+    else
+        echo "GIT_PATH is already set to $GIT_PATH"
+    fi
+}
+
 # Function to install packages based on the distribution
 install_packages() {
     case $DISTRO in
-        debian|ubuntu)
+        debian)
             sudo apt install "$@"
             ;;
         arch)
@@ -38,24 +61,7 @@ install_packages() {
     esac
 }
 
-# Ask user to create a default git location
-read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
-if [[ $create_git_dir =~ ^[Yy]$ ]]; then
-    read -p "Enter the path for git repositories (default: $HOME/git): " git_path
-    git_path=${git_path:-$HOME/git}
-    
-    if [ ! -d "$git_path" ]; then
-        mkdir -p "$git_path"
-        echo "Created git directory at $git_path"
-    else
-        echo "Git directory already exists at $git_path"
-    fi
-    
-    # Export the git path to use later in the script
-    export GIT_PATH="$git_path"
-else
-    echo "Skipping git directory creation."
-fi
+current_dir=$(pwd)
 
 # Ask user if they want to install and setup dwm-curado
 read -p "Do you want to install and setup dwm-curado, a fork of dwm-titus? (y/n) " install_dwm_curado
@@ -87,14 +93,15 @@ if [[ $install_dwm_curado =~ ^[Yy]$ ]]; then
             ;;
     esac
     # Add installation and setup commands for dwm-curado here
-    # For example:
-    git clone https://github.com/curadotd/dwm-curado.git $git_path/dwm-curado
-    cd $git_path/dwm-curado
+    get_git_path
+    git clone https://github.com/curadotd/dwm-curado.git $GIT_PATH/dwm-curado
+    cd $GIT_PATH/dwm-curado
     sudo make clean install
     cd $current_dir
     # Add any additional configuration steps
 else
     echo "Skipping dwm-curado installation and setup."
+    exit 0
 fi
 
 # Ask user if they want to install and setup slstatus-curado
@@ -125,8 +132,9 @@ if [[ $install_slstatus_curado =~ ^[Yy]$ ]]; then
     esac
     # Add installation and setup commands for slstatus_curado here
     # For example:
-    git clone https://github.com/curadotd/slstatus-curado.git $git_path/slstatus-curado
-    cd $git_path/slstatus-curado
+    get_git_path
+    git clone https://github.com/curadotd/slstatus-curado.git $GIT_PATH/slstatus-curado
+    cd $GIT_PATH/slstatus-curado
     sudo make clean install
     cd $current_dir
     # Add any additional configuration steps
@@ -142,15 +150,16 @@ if [[ $install_picom =~ ^[Yy]$ ]]; then
 
     # Check if picom exists
     if ! command -v picom &> /dev/null; then
-        if [ ! -d $git_path/picom ]; then
-            if ! git clone https://github.com/FT-Labs/picom.git $git_path/picom; then
+        if [ ! -d $GIT_PATH/picom ]; then
+            get_git_path
+            if ! git clone https://github.com/FT-Labs/picom.git $GIT_PATH/picom; then
                 echo "Failed to clone the repository"
                 return 1
             fi
         else
             echo "Repository already exists, skipping clone"
         fi
-        cd $git_path/picom || { echo "Failed to change directory to picom"; return 1; }
+        cd $GIT_PATH/picom || { echo "Failed to change directory to picom"; return 1; }
         
         case $DISTRO in
             debian|ubuntu)

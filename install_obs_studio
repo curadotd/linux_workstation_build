@@ -11,7 +11,7 @@ if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         sudo apt install obs-studio ffmpeg
     elif [ -f /etc/arch-release ]; then
         echo "Arch Linux detected. Installing OBS Studio..."
-        sudo pacman -Syu obs-studio ffmpeg
+        sudo pacman -Syu obs-studio ffmpeg --needed
     else
         echo "Unsupported operating system. Please install OBS Studio manually."
         exit 1

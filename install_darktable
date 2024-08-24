@@ -29,39 +29,55 @@ else
     exit 1
 fi
 
+current_dir=$(pwd)
 # Ask if the user wants to install Darktable
 read -p "Do you want to install Darktable? (y/n): " install_choice
 if [[ $install_choice == "y" || $install_choice == "Y" ]]; then
     install_darktable $DISTRO
     echo "Darktable has been installed."
+
+    # Ask if the user wants to clone and use t3mujinpack film emulations
+    read -p "Do you want to clone and use film emulations from t3mujinpack? (y/n): " use_t3mujinpack
+    if [[ $use_t3mujinpack == "y" || $use_t3mujinpack == "Y" ]]; then
+        # Check if GIT_PATH is already set
+        if [ -z "$GIT_PATH" ]; then
+            read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
+            if [[ $create_git_dir =~ ^[Yy]$ ]]; then
+                read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+                GIT_PATH=$git_path
+                export GIT_PATH
+                
+                if [ ! -d "$GIT_PATH" ]; then
+                    mkdir -p "$GIT_PATH"
+                    echo "Created git directory at $GIT_PATH"
+                else
+                    echo "Git directory already exists at $GIT_PATH"
+                fi
+            else
+                echo "Skipping git directory creation."
+            fi
+        else
+            echo "GIT_PATH is already set to $GIT_PATH"
+        fi
+
+        # Clone the t3mujinpack repository
+        git clone https://github.com/t3mujin/t3mujinpack.git "$GIT_PATH/t3mujinpack"
+
+        echo "t3mujinpack has been cloned to $GIT_PATH/t3mujinpack"
+        cd $current_dir
+
+        echo "To install the presets in Darktable:"
+        echo "1. Open Darktable"
+        echo "2. Go to Lighttable mode"
+        echo "3. Find the Styles box"
+        echo "4. Click Import"
+        echo "5. Navigate to $GIT_PATH/t3mujinpack"
+        echo "6. Select all or only the presets you want to install"
+        echo "7. Click Import to add the selected presets to Darktable"
+    else
+        echo "Skipping t3mujinpack film emulations."
+    fi
+
 else
     echo "Skipping Darktable installation."
-fi
-
-# Ask if the user wants to clone and use t3mujinpack film emulations
-read -p "Do you want to clone and use film emulations from t3mujinpack? (y/n): " use_t3mujinpack
-if [[ $use_t3mujinpack == "y" || $use_t3mujinpack == "Y" ]]; then
-    # Ask for the git clone location
-    default_git_location="$HOME/git"
-    read -p "Enter the location to clone the t3mujinpack (default: $default_git_location): " git_location
-    git_location=${git_location:-$default_git_location}
-
-    # Create the directory if it doesn't exist
-    mkdir -p "$git_location"
-
-    # Clone the t3mujinpack repository
-    git clone https://github.com/t3mujin/t3mujinpack.git "$git_location/t3mujinpack"
-
-    echo "t3mujinpack has been cloned to $git_location/t3mujinpack"
-
-    echo "To install the presets in Darktable:"
-    echo "1. Open Darktable"
-    echo "2. Go to Lighttable mode"
-    echo "3. Find the Styles box"
-    echo "4. Click Import"
-    echo "5. Navigate to $git_location/t3mujinpack"
-    echo "6. Select all or only the presets you want to install"
-    echo "7. Click Import to add the selected presets to Darktable"
-else
-    echo "Skipping t3mujinpack film emulations."
 fi

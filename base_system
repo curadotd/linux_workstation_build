@@ -31,22 +31,52 @@ if [[ "$OS" == "Ubuntu" || "$OS" == "Debian GNU/Linux" ]]; then
     sudo apt install tar tree tldr trash-cli unzip make jq lxappearance papirus-icon-theme \
     fonts-noto-color-emoji lm-sensors thunar x11-xserver-utils pavucontrol xdg-utils xinput rofi wget gh \
     libasound2-plugins libasound2-doc alsa-oss alsamixergui apulse locate krita gimp \
-    qt5ct qt5-style-kvantum
+    qt5ct qt5-style-kvantum gedit
 
 elif [[ "$OS" == "Arch Linux" ]]; then
+    
     sudo pacman -S --needed tar tree tldr trash-cli unzip make jq lxappearance papirus-icon-theme \
     noto-fonts-emoji lm_sensors thunar xorg-apps pavucontrol xdg-utils xorg-xinput rofi wget github-cli \
-    alsa-plugins alsa-utils alsa-oss alsa-firmware mlocate krita gimp qt5ct kvantum-qt5 fastfetch openssh
+    alsa-plugins alsa-utils alsa-oss alsa-firmware mlocate krita gimp qt5ct kvantum-qt5 fastfetch openssh gedit
+
+    # Ask user if they want to install yay
+    read -p "Do you want to install yay (AUR helper)? (y/n) " install_yay
+    if [[ $install_yay =~ ^[Yy]$ ]]; then
+        echo "Installing yay..."
+        ./install_yay
+    else
+        echo "Skipping yay installation."
+    fi
 
 elif [[ "$OS" == "Rocky Linux" ]]; then
     sudo dnf install tar tree tldr trash-cli dbus-devel gcc git libconfig-devel libdrm-devel libev \
     libX11-devel libX11-xcb libXext-devel libxcb-devel libGL-devel libEGL-devel libepoxy-devel meson ninja-build \
-    pcre2-devel pixman-devel xcb-util-image-devel xcb-util-renderutil-devel xorg-x11-proto-devel \
+    pcre2-devel pixman-devel xcb-util-image-devel xcb-util-renderutil-devel xorg-x11-proto-devel gedit \
     xcb-util-devel cmake libXft-devel imlib2-devel libXinerama-devel libxcb-devel alsa-utils uthash-devel
     
 else
     echo "Unsupported operating system: $OS"
     exit 1
+fi
+
+# Check if GIT_PATH is already set
+if [ -z "$GIT_PATH" ]; then
+    read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
+    if [[ $create_git_dir =~ ^[Yy]$ ]]; then
+        read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+        GIT_PATH=$git_path
+        
+        if [ ! -d "$GIT_PATH" ]; then
+            mkdir -p "$GIT_PATH"
+            echo "Created git directory at $GIT_PATH"
+        else
+            echo "Git directory already exists at $GIT_PATH"
+        fi
+    else
+        echo "Skipping git directory creation."
+    fi
+else
+    echo "GIT_PATH is already set to $GIT_PATH"
 fi
 
 ./install_fonts
@@ -76,20 +106,15 @@ esac
 cd $current_dir
 
 ./install_starship
-
-./install_mattermost_desktop
-
 ./clone_dotconfig
-
 ./install_tokyo_nights_theme
 
 cd $current_dir
 
 ./install_web_browser
-
 ./install_steam
-
 ./setup_nfs_drives
-./install_darktable
+
+cd $current_dir
 
 echo "Setup is now completed, please reboot your system."

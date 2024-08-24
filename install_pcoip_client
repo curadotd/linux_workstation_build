@@ -9,49 +9,46 @@ if [[ $install_pciop =~ ^[Yy]$ ]]; then
     echo "Installing pciop-client..."
     # Function to install the latest pcoip-client for Arch Linux
     install_arch() {
-        # Check if yay is installed
-        if ! command -v yay &> /dev/null; then
-            echo "yay could not be found, installing it now..."
-            read -p "Enter the directory to clone into (default: /home/$USER/git): " clone_dir
-            clone_dir=${clone_dir:-/home/$USER/git}
-            mkdir -p "$clone_dir"
-            cd "$clone_dir"
-            git clone https://aur.archlinux.org/yay.git
-            cd yay
-            makepkg -si
-            cd "$current_dir"
-        fi
-        read -p "Do you want to clone and update the pcoip-client PKGBUILD? (y/n) " clone_pcoip
-        if [[ $clone_pcoip =~ ^[Yy]$ ]]; then
-            read -p "Enter the directory to clone into (default: /home/$USER/git): " clone_dir
-            clone_dir=${clone_dir:-/home/$USER/git}
-            
-            mkdir -p "$clone_dir"
-            cd "$clone_dir"
-            git clone https://aur.archlinux.org/pcoip-client.git
-            cd pcoip-client
-            
-            # Update PKGBUILD
-            sed -i 's/23.01.1/24.03.4/' PKGBUILD
-            sed -i 's/bbaf1e643e77e239968ec108e9dbee9ade17f47bb4694c8bbf97fdc229a9903f/a069189bcc5cf7c61fae6f7f88f23cc614f8d61535cce781a834c121e8df70bd/' PKGBUILD
-            
-            # Install dependencies
-            yay -S --needed openssl-1.1 qt5-graphicaleffects qt5-networkauth qt5-quickcontrols protobuf3.12 \
-            hiredis0.14 libxkbcommon-x11 libxcb xcb-util-image xcb-util-renderutil mesa
-
-            # Build and install
-            makepkg -si
-
-            # Create a symlink to the pcoip-client binary
-            sudo ln -sf /usr/lib/pcoip-client/pcoip-client /usr/bin/pcoip-client
-            cd "$current_dir"
-        else
-            if ! pacman -Qi pcoip-client &> /dev/null; then
-                yay -S pcoip-client
+        # Check if GIT_PATH is already set
+        if [ -z "$GIT_PATH" ]; then
+            read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
+            if [[ $create_git_dir =~ ^[Yy]$ ]]; then
+                read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+                GIT_PATH=$git_path
+                export GIT_PATH
+                
+                if [ ! -d "$GIT_PATH" ]; then
+                    mkdir -p "$GIT_PATH"
+                    echo "Created git directory at $GIT_PATH"
+                else
+                    echo "Git directory already exists at $GIT_PATH"
+                fi
             else
-                echo "pcoip-client is already installed"
+                echo "Skipping git directory creation."
             fi
+        else
+            echo "GIT_PATH is already set to $GIT_PATH"
         fi
+
+        cd $GIT_PATH
+        git clone https://aur.archlinux.org/pcoip-client.git
+        cd pcoip-client
+        
+        # Update PKGBUILD
+        sed -i 's/23.01.1/24.03.4/' PKGBUILD
+        sed -i 's/bbaf1e643e77e239968ec108e9dbee9ade17f47bb4694c8bbf97fdc229a9903f/a069189bcc5cf7c61fae6f7f88f23cc614f8d61535cce781a834c121e8df70bd/' PKGBUILD
+        
+        # Add the new line to PKGBUILD
+        sed -i '/rm -rf $pkgdir\/usr\/libexec/a\  sudo ln -sf /usr/lib/pcoip-client/pcoip-client /usr/bin/pcoip-client' PKGBUILD
+        
+        # Install dependencies
+        yay -S --needed openssl-1.1 qt5-graphicaleffects qt5-networkauth qt5-quickcontrols protobuf3.12 \
+        hiredis0.14 libxkbcommon-x11 libxcb xcb-util-image xcb-util-renderutil mesa
+        # Build and install
+        makepkg -si
+        # Create a symlink to the pcoip-client binary
+        sudo ln -sf /usr/lib/pcoip-client/pcoip-client /usr/bin/pcoip-client
+        cd "$current_dir"
     }
 
     # Function to install the latest pcoip-client for Rocky Linux

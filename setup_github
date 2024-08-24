@@ -47,13 +47,13 @@ if ! command_exists git; then
     distro=$(detect_distro)
     case $distro in
         arch)
-            sudo pacman -Sy --needed git
+            sudo pacman -Sy --needed git vim
             ;;
         debian)
-            sudo apt update && sudo apt install git
+            sudo apt update && sudo apt install git vim
             ;;
         rocky)
-            sudo dnf install git
+            sudo dnf install git vim
             ;;
         *)
             echo "Unsupported distribution. Please install Git manually and run this script again."
