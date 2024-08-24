@@ -40,6 +40,8 @@ elif [[ "$OS" == "Arch Linux" ]]; then
     alsa-plugins alsa-utils alsa-oss alsa-firmware mlocate krita gimp qt5ct kvantum-qt5 fastfetch openssh gedit \
     bash-completion
 
+    
+
     # Ask user if they want to install yay
     read -p "Do you want to install yay (AUR helper)? (y/n) " install_yay
     if [[ $install_yay =~ ^[Yy]$ ]]; then
@@ -117,5 +119,22 @@ cd $current_dir
 ./setup_nfs_drives
 
 cd $current_dir
+
+# Ask user if they want to install onboard
+read -p "Do you want to install onboard (on-screen keyboard)? (y/n) " install_onboard
+if [[ $install_onboard =~ ^[Yy]$ ]]; then
+    echo "Installing onboard..."
+    if [[ "$OS" == "Ubuntu" || "$OS" == "Debian GNU/Linux" ]]; then
+        sudo apt install onboard
+    elif [[ "$OS" == "Arch Linux" ]]; then
+        sudo pacman -S --needed onboard
+    elif [[ "$OS" == "Rocky Linux" ]]; then
+        sudo dnf install onboard
+    else
+        echo "Unsupported operating system for onboard installation: $OS"
+    fi
+else
+    echo "Skipping onboard installation."
+fi
 
 echo "Setup is now completed, please reboot your system."
