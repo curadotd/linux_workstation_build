@@ -22,7 +22,15 @@ install_arch_davinci() {
             exit 1
         fi
     fi
-    yay -S davinci-resolve log4cxx --needed
+    
+    read -p "Do you want to install DaVinci Resolve (free) or DaVinci Resolve Studio? (free/studio): " resolve_version
+    if [[ $resolve_version == "studio" ]]; then
+        yay -S davinci-resolve-studio log4cxx --needed
+        sudo cp /usr/lib/libgio-2.0.so /opt/resolve/libs && sudo cp /usr/lib/libgmodule-2.0.so /opt/resolve/libs
+    else
+        yay -S davinci-resolve log4cxx --needed
+        sudo cp /usr/lib/libgio-2.0.so /opt/resolve/libs && sudo cp /usr/lib/libgmodule-2.0.so /opt/resolve/libs
+    fi
 }
 
 # Function to install graphics drivers and dependencies for Debian-based systems

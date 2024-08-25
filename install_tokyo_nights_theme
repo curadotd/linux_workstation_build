@@ -57,37 +57,6 @@ EOL
     else
         echo "qt5ct color scheme file already exists. Skipping creation."
     fi
-
-    # Determine the correct location for qt.conf
-    if [ -f "/etc/arch-release" ]; then
-        qt_conf_path="/etc/profile.d/qt.sh"
-    else
-        qt_conf_path="/etc/environment.d/qt.conf"
-    fi
-
-    # Create qt.conf if it doesn't exist
-    if [ ! -f "$qt_conf_path" ]; then
-        if [ "$qt_conf_path" = "/etc/profile.d/qt.sh" ]; then
-            sudo tee "$qt_conf_path" > /dev/null << EOL
-export QT_QPA_PLATFORMTHEME=qt5ct
-export QT_PLUGIN_PATH="/usr/lib/qt/plugins:$QT_PLUGIN_PATH"
-export QT_QPA_PLATFORM="xcb"
-export QT_STYLE_OVERRIDE="kvantum"
-export QT_AUTO_SCREEN_SCALE_FACTOR=1
-EOL
-        else
-            sudo tee "$qt_conf_path" > /dev/null << EOL
-QT_QPA_PLATFORMTHEME=qt5ct
-QT_PLUGIN_PATH="/usr/lib/qt/plugins:$QT_PLUGIN_PATH"
-QT_QPA_PLATFORM="xcb"
-QT_STYLE_OVERRIDE="kvantum"
-QT_AUTO_SCREEN_SCALE_FACTOR=1
-EOL
-        fi
-        echo "Created $qt_conf_path"
-    else
-        echo "$(basename "$qt_conf_path") already exists. Skipping creation."
-    fi
         
     echo "Tokyo Night theme and qt color scheme installed. Please follow the theme's documentation for activation."
     cd $current_dir
