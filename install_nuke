@@ -18,16 +18,16 @@ install_dependencies() {
     local distro=$1
     case $distro in
         arch)
-            sudo pacman -Syu --noconfirm
-            sudo pacman -S --noconfirm libglvnd libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms
+            sudo pacman -Syu
+            sudo pacman -S --needed libglvnd libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms
             ;;
         debian)
             sudo apt update
-            sudo apt install -y libglu1-mesa libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0
+            sudo apt install libglu1-mesa libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0
             ;;
         rocky)
-            sudo dnf update -y
-            sudo dnf install -y mesa-libGLU libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms
+            sudo dnf update
+            sudo dnf install mesa-libGLU libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms
             ;;
     esac
 }
