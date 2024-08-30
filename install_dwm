@@ -18,30 +18,6 @@ get_distro() {
 
 # Detect the distribution
 DISTRO=$(get_distro)
-
-get_git_path() {
-    # Check if GIT_PATH is already set
-    if [ -z "$GIT_PATH" ]; then
-        read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
-        if [[ $create_git_dir =~ ^[Yy]$ ]]; then
-            read -p "Enter the path for git repositories (default: $HOME/git): " git_path
-            GIT_PATH=$git_path
-            export GIT_PATH
-            
-            if [ ! -d "$GIT_PATH" ]; then
-                mkdir -p "$GIT_PATH"
-                echo "Created git directory at $GIT_PATH"
-            else
-                echo "Git directory already exists at $GIT_PATH"
-            fi
-        else
-            echo "Skipping git directory creation."
-        fi
-    else
-        echo "GIT_PATH is already set to $GIT_PATH"
-    fi
-}
-
 # Function to install packages based on the distribution
 install_packages() {
     case $DISTRO in
@@ -104,43 +80,7 @@ else
     exit 0
 fi
 
-# Ask user if they want to install and setup slstatus-curado
-read -p "Do you want to install and setup slstatus-curado, a fork of slstatus? (y/n) " install_slstatus_curado
-
-if [[ $install_slstatus_curado =~ ^[Yy]$ ]]; then
-    echo "Installing and setting up slstatus-curado..."
-    echo "Installing dependencies"
-    case $DISTRO in
-        debian|ubuntu)
-            install_packages libx11-dev libxft-dev libxinerama-dev alsa-oss
-            sudo /usr/sbin/modprobe snd-pcm-oss
-            echo "Adding snd-pcm-oss to /etc/modules-load.d/modules.conf"
-            echo "snd-pcm-oss" | sudo tee -a /etc/modules-load.d/modules.conf > /dev/null
-            ;;
-        arch)
-            install_packages libx11 libxft libxinerama alsa-oss
-            sudo modprobe snd-pcm-oss
-            echo "Adding snd-pcm-oss to /etc/modules-load.d/snd-pcm-oss.conf"
-            echo "snd-pcm-oss" | sudo tee /etc/modules-load.d/snd-pcm-oss.conf > /dev/null
-            ;;
-        rocky)
-            install_packages libX11-devel libXft-devel libXinerama-devel alsa-oss
-            sudo modprobe snd-pcm-oss
-            echo "Adding snd-pcm-oss to /etc/modules-load.d/snd-pcm-oss.conf"
-            echo "snd-pcm-oss" | sudo tee /etc/modules-load.d/snd-pcm-oss.conf > /dev/null
-            ;;
-    esac
-    # Add installation and setup commands for slstatus_curado here
-    # For example:
-    get_git_path
-    git clone https://github.com/curadotd/slstatus-curado.git $GIT_PATH/slstatus-curado
-    cd $GIT_PATH/slstatus-curado
-    sudo make clean install
-    cd $current_dir
-    # Add any additional configuration steps
-else
-    echo "Skipping slstatus-curado installation and setup."
-fi
+./install_slstatus
 
 # Ask user if they want to use picom files
 read -p "Do you want to install picom? (y/n) " install_picom
