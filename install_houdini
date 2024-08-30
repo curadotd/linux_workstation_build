@@ -1,0 +1,230 @@
+#!/bin/bash
+
+# Function to detect the Linux distribution
+detect_distro() {
+    if [ -f /etc/arch-release ]; then
+        echo "arch"
+    elif [ -f /etc/debian_version ]; then
+        echo "debian"
+    elif [ -f /etc/rocky-release ]; then
+        echo "rocky"
+    else
+        echo "unknown"
+    fi
+}
+
+# Function to install dependencies
+install_dependencies() {
+    local distro=$1
+    case $distro in
+        arch)
+            sudo pacman -Syy
+            sudo pacman -S --needed libgl libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms avahi
+            ;;
+        debian)
+            sudo apt update
+            sudo apt install libgl1-mesa-glx libxcb1 libxcb-keysyms1 libxcb-util1 libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-xinerama0 avahi
+            ;;
+        rocky)
+            sudo dnf update
+            sudo dnf install mesa-libGL libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms avahi
+            ;;
+    esac
+}
+
+# Main script
+echo "SideFX Houdini Installation Script"
+echo "=================================="
+
+# Detect distribution
+distro=$(detect_distro)
+if [ "$distro" == "unknown" ]; then
+    echo "Unsupported Linux distribution. This script works for Arch, Debian, and Rocky Linux."
+    exit 1
+fi
+
+# Ask user to choose Houdini version
+echo "Please select the Houdini version you want to install:"
+echo "1. Houdini Apprentice (Free)"
+echo "2. Houdini Indie"
+echo "3. Houdini Full (Commercial)"
+read -p "Enter your choice (1/2/3): " houdini_version
+
+case $houdini_version in
+    1) version_name="Apprentice";;
+    2) version_name="Indie";;
+    3) version_name="Full";;
+    *) echo "Invalid choice. Exiting."; exit 1;;
+esac
+
+# Ask user to download Houdini
+echo "Please download the SideFX Houdini $version_name installer from https://www.sidefx.com/download/ to your ~/Downloads folder."
+read -p "Press Enter when you have downloaded the installer."
+
+# Find the Houdini installer
+installer=$(find ~/Downloads -name "houdini-*-linux_x86_64_*.tar.gz" -type f -print -quit)
+
+if [ -z "$installer" ]; then
+    echo "Houdini installer not found in ~/Downloads. Please download it and try again."
+    exit 1
+fi
+
+# Extract the installer
+echo "Extracting Houdini installer..."
+tar -xzf "$installer" -C ~/Downloads
+
+# Find the extracted directory
+install_dir=$(find ~/Downloads -name "houdini-*-linux_x86_64_*" -type d -print -quit)
+
+if [ -z "$install_dir" ]; then
+    echo "Extracted Houdini directory not found. Installation failed."
+    exit 1
+fi
+
+# Install dependencies
+echo "Installing dependencies for $distro..."
+install_dependencies $distro
+
+cd "$install_dir"
+
+# Extract Houdini version from the installer filename
+houdini_version=$(echo "$installer" | grep -oP 'houdini-\K[0-9.]+')
+
+# Run the installer
+echo "Installing Houdini $version_name..."
+read -p "Enter the path where Houdini should be installed (e.g., /opt/hfs-$houdini_version): " houdini_path
+
+# Check if the user has write permissions to the chosen path
+if [ -w "$(dirname "$houdini_path")" ]; then
+    install_command="./houdini.install"
+else
+    echo "You don't have write permissions to $houdini_path. Using sudo to install."
+    install_command="sudo ./houdini.install"
+fi
+
+eula_date=$(grep -oP 'LICENSE_DATE="\K[0-9-]+' ./houdini.install)
+if [ -n "$eula_date" ]; then
+    $install_command  --install-engine-unreal --no-install-houdini --auto-install "$houdini_path"
+else
+    echo "Error: Could not find EULA date in houdini.install script."
+    exit 1
+fi
+
+$install_command --accept-EULA $eula_date --install-houdini --no-install-license --no-install-menus --no-install-bin-symlink \
+--install-sidefxlabs --make-dir --no-root-check --no-install-hfs-symlink --auto-install "$houdini_path"
+
+# Ask about engine plugins
+read -p "Do you want to install the Maya engine plugin? (y/n): " install_maya
+read -p "Do you want to install the Unity engine plugin? (y/n): " install_unity
+read -p "Do you want to install the Unreal engine plugin? (y/n): " install_unreal
+
+if [[ $install_maya == [Yy]* ]]; then
+    $install_command --accept-EULA $eula_date --install-engine-maya --no-install-houdini --auto-install  "$houdini_path"
+fi
+
+if [[ $install_unity == [Yy]* ]]; then
+    $install_command --accept-EULA $eula_date --install-engine-unity --no-install-houdini --auto-install "$houdini_path"
+fi
+
+if [[ $install_unreal == [Yy]* ]]; then
+    $install_command --accept-EULA $eula_date --accept-EULA $eula_date --install-engine-unreal --no-install-houdini --auto-install "$houdini_path"
+fi
+
+# Check if /etc/init.d exists and create it if not
+if [ ! -d "/etc/init.d" ]; then
+    echo "The /etc/init.d directory does not exist. Creating it now..."
+    sudo mkdir -p /etc/init.d
+    echo "/etc/init.d directory created successfully."
+else
+    echo "/etc/init.d directory already exists."
+fi
+
+#Install license server
+sudo ./houdini.install --accept-EULA $eula_date --install-license --no-install-houdini --auto-install
+
+# Create launch script
+read -p "Do you want to create a launch script? (y/n): " launch_answer
+if [[ $launch_answer == [Yy]* ]]; then
+    read -p "Enter the path where you want the launcher to be installed (e.g., /usr/local/bin): " launch_houdini_path
+
+    cat << EOF > $launch_houdini_path/houdini_launcher
+#!/bin/bash
+if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
+    echo "Usage:"
+    echo "  ./houdini_launcher       # Launch Houdini"
+    echo "  ./houdini_launcher fx    # Launch Houdini FX"
+    echo "  ./houdini_launcher core  # Launch Houdini Core"
+    exit 0
+fi
+
+# Check if sesinetd service is running, if not start it
+if ! pgrep -x "sesinetd" > /dev/null
+then
+    sudo /usr/lib/sesi/sesinetd.startup start
+fi
+
+## Set some envs
+export HOUDINI_ROOT_PATH="$houdini_path"
+export HOUDINI_VERSION="hfs-$houdini_version"
+export HOUDINI_OCL_DEVICETYPE=GPU
+export HOUDINI_USE_HFS_OCL=0
+
+
+source \$HOUDINI_ROOT_PATH/\$HOUDINI_VERSION
+if [ "\$1" == "fx" ]; then
+    houdinifx
+elif [ "\$1" == "core" ]; then
+    houdinicore
+else
+    houdini
+fi
+EOF
+
+    chmod +x $launch_houdini_path/houdini_launcher
+
+    echo "Launch script created. Usage:"
+    echo "  ./houdini_launcher       # Launch Houdini FX"
+    echo "  ./houdini_launcher fx    # Launch Houdini FX"
+    echo "  ./houdini_launcher core  # Launch Houdini Core"
+else
+    echo "Launch script not created."
+fi
+
+# Add to PATH
+read -p "Do you want to add the Houdini launcher to your PATH, in the .bashrc? (y/n): " add_to_path
+if [ "$add_to_path" == "y" ]; then
+    echo "export PATH=\$PATH:$launch_houdini_path" >> ~/.bashrc
+    echo "Houdini launcher added to PATH. Please restart your terminal or run 'source ~/.bashrc'."
+else
+    echo "Add $launch_houdini_path/houdini_launcher to your 'PATH' environment variables manually if needed."
+fi
+
+# Create application launcher
+read -p "Do you want to create application launchers for Houdini? (y/n): " create_launcher
+if [ "$create_launcher" == "y" ]; then
+    mkdir -p ~/.local/share/applications
+    
+    # Houdini FX
+    cat << EOF > ~/.local/share/applications/houdinifx.desktop
+[Desktop Entry]
+Name=Houdini FX
+Exec=$launch_houdini_path/houdini_launcher fx
+Icon=$houdini_path/houdini_logo.png
+Type=Application
+Categories=Graphics;
+EOF
+
+    # Houdini Core
+    cat << EOF > ~/.local/share/applications/houdinicore.desktop
+[Desktop Entry]
+Name=Houdini Core
+Exec=$launch_houdini_path/houdini_launcher core
+Icon=$houdini_path/houdini_logo.png
+Type=Application
+Categories=Graphics;
+EOF
+
+    echo "Application launchers created for Houdini FX, Houdini Core, and Houdini Indie. You should now see them in your applications menu."
+fi
+
+echo "SideFX Houdini $version_name installation completed!"
