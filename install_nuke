@@ -72,11 +72,26 @@ echo "Installing dependencies for $distro..."
 $install_dependencies $distro
 
 # Run the installer
-echo "Installing Nuket..."
-read -p "Enter the path where Nuke was installed (e.g., /opt/foundry/nuke): " nuke_path
+echo "Installing Nuke..."
+read -p "Enter the path where Nuke should be installed (e.g., /opt/foundry/nuke): " nuke_path
 
-echo "Running Nuke installer..."
-$install_file --accept-foundry-eula --prefix=$nuke_path
+# Check if the installation path requires sudo
+if [[ "$nuke_path" == /opt/* || "$nuke_path" == /usr/* ]]; then
+    echo "The specified path may require sudo permissions."
+    echo "Running Nuke installer with sudo..."
+    sudo $install_file --accept-foundry-eula --prefix=$nuke_path
+else
+    echo "Running Nuke installer..."
+    $install_file --accept-foundry-eula --prefix=$nuke_path
+fi
+
+# Check if installation was successful
+if [ $? -eq 0 ]; then
+    echo "Nuke installation completed successfully."
+else
+    echo "Nuke installation failed. Please check the error messages above."
+    exit 1
+fi
 
 # Extract Nuke version from the installer filename
 nuke_version=$(echo "$installer" | grep -oP 'Nuke\K[0-9.v]+' | head -1)
@@ -89,10 +104,19 @@ read -p "Do you to create a launch script (y/n): " launch_answer
 if [[ $launch_answer == [Yy]* ]]; then
 
     read -p "Enter the path where you want the launcher to be installed (e.g., /usr/local/bin): " launch_nuke_path
+    
+    # Check if the launcher path requires sudo
+    if [[ "$launch_nuke_path" == /opt/* || "$launch_nuke_path" == /usr/* ]]; then
+        echo "The specified path may require sudo permissions."
+        sudo_prefix="sudo"
+    else
+        sudo_prefix=""
+    fi
+
     read -p "Are you running Nuke Non-Commercial? (y/n): " nuke_non_commercial
     if [[ $nuke_non_commercial == [Yy]* ]]; then
         # Nuke Non-Commercial version
-        cat << EOF > $launch_nuke_path/nuke_launcher
+        $sudo_prefix cat << EOF > $launch_nuke_path/nuke_launcher
 #!/bin/bash
 if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
     echo "Usage:"
@@ -112,7 +136,7 @@ fi
 EOF
     else
         # Commercial version
-        cat << EOF > $launch_nuke_path/nuke_launcher
+        $sudo_prefix cat << EOF > $launch_nuke_path/nuke_launcher
 #!/bin/bash
 if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
     echo "Usage:"
@@ -132,7 +156,7 @@ fi
 EOF
     fi
 
-    chmod +x $launch_nuke_path/nuke_launcher
+    $sudo_prefix chmod +x $launch_nuke_path/nuke_launcher
 
     echo "Launch script created. Usage:"
     echo "  ./nuke_launcher       # Launch regular Nuke"

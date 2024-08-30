@@ -147,7 +147,15 @@ read -p "Do you want to create a launch script? (y/n): " launch_answer
 if [[ $launch_answer == [Yy]* ]]; then
     read -p "Enter the path where you want the launcher to be installed (e.g., /usr/local/bin): " launch_houdini_path
 
-    cat << EOF > $launch_houdini_path/houdini_launcher
+        # Check if the launcher path requires sudo
+    if [[ "$launch_houdini_path" == /opt/* || "$launch_houdini_path" == /usr/* ]]; then
+        echo "The specified path may require sudo permissions."
+        sudo_prefix="sudo"
+    else
+        sudo_prefix=""
+    fi
+
+    $sudo_prefix cat << EOF > $launch_houdini_path/houdini_launcher
 #!/bin/bash
 if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
     echo "Usage:"
@@ -180,7 +188,7 @@ else
 fi
 EOF
 
-    chmod +x $launch_houdini_path/houdini_launcher
+    $sudo_prefix chmod +x $launch_houdini_path/houdini_launcher
 
     echo "Launch script created. Usage:"
     echo "  ./houdini_launcher       # Launch Houdini FX"
