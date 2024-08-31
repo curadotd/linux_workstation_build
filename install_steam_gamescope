@@ -108,20 +108,26 @@ if [[ $gamescope_answer == [Yy]* ]]; then
     sudo tee /usr/share/wayland-sessions/gamescope.desktop > /dev/null << EOL
 [Desktop Entry]
 Encoding=UTF-8
-Name=gamescope
+Name=gamescope -f -- steam -gamepadui
 Comment=GPU accelerated nested compositor
-Exec=gamescope -f -- steam -gamepadui
+Exec=gamescope steam
 Type=Application
 EOL
 
-    # Create SDDM autologin configuration
-    echo "Creating SDDM autologin configuration..."
-    sudo mkdir -p /etc/sddm.conf.d
-    sudo tee /etc/sddm.conf.d/autologin.conf > /dev/null << EOL
+    read -p "Do you want to enable autologin in sddm? (y/n): " auto_login
+    if [[ $auto_login == [Yy]* ]]; then
+        # Create SDDM autologin configuration
+        echo "Creating SDDM autologin configuration..."
+        sudo mkdir -p /etc/sddm.conf.d
+        sudo tee /etc/sddm.conf.d/autologin.conf > /dev/null << EOL
 [Autologin]
 User=$USER
 Session=gamescope
 EOL
+        echo "AutoLogin enabled"
+    else
+        echo "AutoLogin skipped"
+    fi
 
     echo "Gamescope installation and configuration completed."
 else
