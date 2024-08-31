@@ -114,6 +114,9 @@ Exec=gamescope -f -- steam -gamepadui
 Type=Application
 EOL
 
+    sudo usermod -aG seat $USER
+    sudo usermod -aG video $USER
+
     read -p "Do you want to enable autologin in sddm? (y/n): " auto_login
     if [[ $auto_login == [Yy]* ]]; then
         # Create SDDM autologin configuration
