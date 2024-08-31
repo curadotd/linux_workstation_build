@@ -123,7 +123,7 @@ if [[ $gamescope_answer == [Yy]* ]]; then
     sudo tee /usr/share/wayland-sessions/gamescope.desktop > /dev/null << EOL
 [Desktop Entry]
 Encoding=UTF-8
-Name=gamescope -f -- steam -gamepadui
+Name=gamescope
 Comment=GPU accelerated nested compositor
 Exec=gamescope -f -- steam -gamepadui
 Type=Application
