@@ -196,7 +196,13 @@ case $OS in
         ;;
 esac
 
-sudo usermod -aG video $USER
+# Check if video group exists and add user to it
+if getent group video > /dev/null 2>&1; then
+    sudo usermod -aG video $USER
+    echo "User added to video group."
+else
+    echo "Video group does not exist. Skipping."
+fi
 
 read -p "Do you want to reboot the system now? (y/n): " reboot_choice
 if [[ "$reboot_choice" == "y" ]]; then
