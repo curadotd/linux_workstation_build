@@ -96,7 +96,7 @@ if [[ $install_drivers =~ ^[Yy]$ ]]; then
                 
                 # Add NVIDIA modules to mkinitcpio.conf
                 if ! grep -q "nvidia nvidia_modeset nvidia_uvm nvidia_drm" /etc/mkinitcpio.conf; then
-                    sudo sed -i 's/MODULES=(/MODULES=(nvidia nvidia_modeset nvidia_uvm nvidia_drm /' /etc/mkinitcpio.conf
+                    sudo sed -i 's/MODULES=(/MODULES=( nvidia nvidia_modeset nvidia_uvm nvidia_drm /' /etc/mkinitcpio.conf
                     echo "NVIDIA modules added to /etc/mkinitcpio.conf"
                 else
                     echo "NVIDIA modules already present in /etc/mkinitcpio.conf"
