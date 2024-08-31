@@ -71,7 +71,22 @@ if [[ $gamescope_answer == [Yy]* ]]; then
             sudo dnf install gamescope
             ;;
         "Arch Linux")
-            sudo pacman -S --needed gamescope
+            # Check if NVIDIA GPU is present
+            if lspci | grep -i nvidia > /dev/null; then
+                echo "NVIDIA GPU detected. Installing gamescope-nvidia from AUR..."
+                if command -v yay &> /dev/null; then
+                    yay -S --needed gamescope-nvidia
+                else
+                    echo "Yoy need to install yay."
+                    ./install_yay
+                    yay -S --needed gamescope-nvidia
+                    
+                    exit 1
+                fi
+            else
+                echo "No NVIDIA GPU detected. Installing standard gamescope package..."
+                sudo pacman -S --needed gamescope
+            fi
             ;;
         *)
             echo "Unsupported distribution for Gamescope installation: $OS"
