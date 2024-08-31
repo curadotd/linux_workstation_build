@@ -114,6 +114,7 @@ Exec=gamescope -f -- steam -gamepadui
 Type=Application
 EOL
 
+    sudo systemctl enable seatd
     sudo usermod -aG seat $USER
     sudo usermod -aG video $USER
 
