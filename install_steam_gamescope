@@ -110,7 +110,7 @@ if [[ $gamescope_answer == [Yy]* ]]; then
 Encoding=UTF-8
 Name=gamescope -f -- steam -gamepadui
 Comment=GPU accelerated nested compositor
-Exec=gamescope steam
+Exec=gamescope -f -- steam -gamepadui
 Type=Application
 EOL
 
