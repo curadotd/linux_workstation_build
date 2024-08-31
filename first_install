@@ -196,6 +196,8 @@ case $OS in
         ;;
 esac
 
+sudo usermod -aG video $USER
+
 read -p "Do you want to reboot the system now? (y/n): " reboot_choice
 if [[ "$reboot_choice" == "y" ]]; then
     echo "Rebooting the system..."
