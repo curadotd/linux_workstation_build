@@ -12,15 +12,15 @@ fi
 
 # Check if the user is on Debian sid or bookworm
 if [[ "$OS" == "Debian GNU/Linux" ]]; then
-    if grep -q "deb http://deb.debian.org/debian/ sid main contrib non-free" /etc/apt/sources.list; then
-        echo "Debian sid repository already exists."
-    elif grep -q "deb http://deb.debian.org/debian/ bookworm main contrib non-free" /etc/apt/sources.list; then
+    if grep -q "deb http://deb.debian.org/debian/ bookworm main contrib non-free" /etc/apt/sources.list; then
         echo "Debian bookworm repository already exists."
+    elif grep -q "deb http://deb.debian.org/debian/ sid main contrib non-free" /etc/apt/sources.list; then
+        echo "Debian sid repository already exists."
     else
-        echo "Adding Debian sid repository to sources list..."
-        echo "deb http://deb.debian.org/debian/ sid main contrib non-free" | sudo tee -a /etc/apt/sources.list
-        # Optionally, you can add bookworm support here if needed
-        # echo "deb http://deb.debian.org/debian/ bookworm main contrib non-free" | sudo tee -a /etc/apt/sources.list
+        echo "Adding Debian bookworm repository to sources list..."
+        echo "deb http://deb.debian.org/debian/ bookworm main contrib non-free" | sudo tee -a /etc/apt/sources.list
+        # Optionally, you can add sid support here if needed
+        # echo "deb http://deb.debian.org/debian/ sid main contrib non-free" | sudo tee -a /etc/apt/sources.list
     fi
 fi
 
