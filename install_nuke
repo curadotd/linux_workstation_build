@@ -97,11 +97,11 @@ if [[ $launch_answer == [Yy]* ]]; then
     read -p "Enter the path where you want the launcher to be installed (e.g., /usr/local/bin): " launch_nuke_path
     
     # Check if the launcher path requires sudo
-    if [[ "$launch_nuke_path" == /opt/* || "$launch_nuke_path" == /usr/* ]]; then
+    if [[ "$launch_nuke_path" == /opt/* || "$launch_nuke_path" == /usr/* || "$launch_nuke_path" == /usr/local/* ]]; then
         echo "The specified path may require sudo permissions."
-        export sudo_prefix="sudo"
+        sudo_prefix="sudo"
     else
-        export sudo_prefix=""
+        sudo_prefix=""
     fi
 
     read -p "Are you running Nuke Non-Commercial? (y/n): " nuke_non_commercial
