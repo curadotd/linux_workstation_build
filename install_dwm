@@ -23,6 +23,8 @@ get_git_path() {
     fi
 }
 
+get_git_path
+
 current_dir=$(pwd)
 
 # Ask user if they want to install and setup dwm-curado
