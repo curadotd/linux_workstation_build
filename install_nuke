@@ -114,8 +114,8 @@ else
 fi
 EOF
         else
-            # Commercial version
-            $sudo_prefix cat << EOF > $launch_nuke_path/nuke_launcher
+        # Commercial version
+        $sudo_prefix cat << EOF > $launch_nuke_path/nuke_launcher
 #!/bin/bash
 if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
     echo "Usage:"
