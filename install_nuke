@@ -90,7 +90,20 @@ nuke_version=$(echo "$installer" | grep -oP 'Nuke\K[0-9.v]+' | head -1)
 # Extract major version (e.g., 15.1 from 15.1v2)
 nuke_major_version=$(echo "$nuke_version" | grep -oP '^[0-9]+\.[0-9]+')
 
-launcher_script(){
+# Ask user if they want to install Steam
+read -p "Do you to create a launch script (y/n): " launch_answer
+if [[ $launch_answer == [Yy]* ]]; then
+
+    read -p "Enter the path where you want the launcher to be installed (e.g., /usr/local/bin): " launch_nuke_path
+    
+    # Check if the launcher path requires sudo
+    read -p "Does your choosen path require sudo? (e.g., /usr/local/bin): " sudo_prefix_question
+    if [[ $sudo_prefix_question == [Yy]* ]]; then
+        echo "The specified path may require sudo permissions."
+        sudo_prefix="sudo"
+    else
+        sudo_prefix=""
+    fi
 
     read -p "Are you running Nuke Non-Commercial? (y/n): " nuke_non_commercial
     if [[ $nuke_non_commercial == [Yy]* ]]; then
@@ -141,24 +154,6 @@ EOF
     echo "  ./nuke_launcher       # Launch regular Nuke"
     echo "  ./nuke_launcher x     # Launch NukeX"
     echo "  ./nuke_launcher studio # Launch Nuke Studio"
-
-}
-
-# Ask user if they want to install Steam
-read -p "Do you to create a launch script (y/n): " launch_answer
-if [[ $launch_answer == [Yy]* ]]; then
-
-    read -p "Enter the path where you want the launcher to be installed (e.g., /usr/local/bin): " launch_nuke_path
-    
-    # Check if the launcher path requires sudo
-    if [[ "$launch_nuke_path" == /opt/* || "$launch_nuke_path" == /usr/* ]]; then
-        echo "The specified path may require sudo permissions."
-        sudo_prefix="sudo"
-        $launcher_script
-    else
-        sudo_prefix=""
-        $launcher_script
-    fi
 else
     echo "Launch script not created."
 fi
