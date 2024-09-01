@@ -52,7 +52,7 @@ fi
 
 # Extract the installer
 echo "Extracting Nuke installer..."
-echo tar -xzf "$installer" -C ~/Downloads
+tar -xzf "$installer" -C ~/Downloads
 
 # Find the extracted directory
 install_file=$(find ~/Downloads -name "Nuke*-linux-*.run" -type f -print -quit)
@@ -70,7 +70,7 @@ read -p "Enter the path where Nuke should be installed (e.g., /opt/foundry/nuke)
 if [[ "$nuke_path" == /opt/* || "$nuke_path" == /usr/* ]]; then
     echo "The specified path may require sudo permissions."
     echo "Running Nuke installer with sudo..."
-    echo sudo $install_file --accept-foundry-eula --prefix=$nuke_path
+    sudo $install_file --accept-foundry-eula --prefix=$nuke_path
 else
     echo "Running Nuke installer..."
     $install_file --accept-foundry-eula --prefix=$nuke_path
@@ -96,18 +96,14 @@ if [[ $launch_answer == [Yy]* ]]; then
 
     read -p "Enter the path where you want the launcher to be installed (e.g., /usr/local/bin): " launch_nuke_path
     read -p "Are you running Nuke Non-Commercial? (y/n): " nuke_non_commercial
-    if [[ $nuke_non_commercial == [Yy]* ]]; then
-        nc="--nc"
-    else
-        nc=""
-    fi
     if [[ "$launch_nuke_path" == /opt/* || "$launch_nuke_path" == /usr/* ]]; then
         sudoer="sudo"
     else
         sudoer=""
     fi
 
-    $sudoer tee -a $launch_nuke_path/nuke_launcher >/dev/null <<'EOF'
+    if [[ $nuke_non_commercial == [Yy]* ]]; then
+        $sudoer tee -a $launch_nuke_path/nuke_launcher >/dev/null <<'EOF'
 #!/bin/bash
 if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
     echo "Usage:"
@@ -118,14 +114,35 @@ if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
 fi
 
 if [ "\$1" == "x" ]; then
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nukex $nc
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nukex --nc
 elif [ "\$1" == "studio" ]; then
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --studio $nc
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --studio --nc
 else
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} $nc
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nc
 fi
 EOF
+        $sudoer chomd +x $launch_nuke_path/nuke_launcher
+    else
+        $sudoer tee -a $launch_nuke_path/nuke_launcher >/dev/null <<'EOF'
+#!/bin/bash
+if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
+    echo "Usage:"
+    echo "  ./nuke_launcher       # Launch regular Nuke"
+    echo "  ./nuke_launcher x     # Launch NukeX"
+    echo "  ./nuke_launcher studio # Launch Nuke Studio"
+    exit 0
+fi
 
+if [ "\$1" == "x" ]; then
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nukex --nc
+elif [ "\$1" == "studio" ]; then
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --studio --nc
+else
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nc
+fi
+EOF
+    $sudoer chomd +x $launch_nuke_path/nuke_launcher
+    fi
     echo "Launch script created. Usage:"
     echo "  ./nuke_launcher       # Launch regular Nuke"
     echo "  ./nuke_launcher x     # Launch NukeX"
