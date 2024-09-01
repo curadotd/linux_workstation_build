@@ -23,7 +23,7 @@ get_git_path() {
     fi
 }
 
-get_git_path()
+get_git_path
 
 current_dir=$(pwd)
 
