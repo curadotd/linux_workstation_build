@@ -37,13 +37,6 @@ install_dependencies() {
 echo "Foundry Nuke Installation Script"
 echo "================================"
 
-# Detect distribution
-distro=$(detect_distro)
-if [ "$distro" == "unknown" ]; then
-    echo "Unsupported Linux distribution. This script works for Arch, Debian, and Rocky Linux."
-    exit 1
-fi
-
 # Ask user to download Nuke
 echo "Please download the Foundry Nuke installer from https://www.foundry.com/products/nuke/download to your ~/Downloads folder."
 read -p "Press Enter when you have downloaded the installer."
@@ -70,7 +63,7 @@ fi
 
 # Install dependencies
 echo "Installing dependencies for $distro..."
-$install_dependencies $OS
+$install_dependencies
 
 # Run the installer
 echo "Installing Nuke..."
