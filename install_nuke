@@ -51,12 +51,8 @@ if [ -z "$installer" ]; then
 fi
 
 # Extract the installer
-if [ -d ~/Downloads/Nuke${nuke_version} ]; then
-    echo "Nuke installer already extracted."
-else
-    echo "Extracting Nuke installer..."
-    tar -xzf "$installer" -C ~/Downloads
-fi
+echo "Extracting Nuke installer..."
+echo tar -xzf "$installer" -C ~/Downloads
 
 # Find the extracted directory
 install_file=$(find ~/Downloads -name "Nuke*-linux-*.run" -type f -print -quit)
@@ -70,19 +66,11 @@ fi
 echo "Installing Nuke..."
 read -p "Enter the path where Nuke should be installed (e.g., /opt/foundry/nuke): " nuke_path
 
-# Check if Nuke is already installed
-if [ -d "$nuke_path/Nuke${nuke_version}" ]; then
-    read -p "Nuke is already installed. Do you want to reinstall it? (y/n): " reinstall_answer
-    if [[ "$reinstall_answer" != [Yy]* ]]; then
-        echo "Skipping installation."
-    fi
-fi
-
 # Check if the installation path requires sudo
 if [[ "$nuke_path" == /opt/* || "$nuke_path" == /usr/* ]]; then
     echo "The specified path may require sudo permissions."
     echo "Running Nuke installer with sudo..."
-    sudo $install_file --accept-foundry-eula --prefix=$nuke_path
+    echo sudo $install_file --accept-foundry-eula --prefix=$nuke_path
 else
     echo "Running Nuke installer..."
     $install_file --accept-foundry-eula --prefix=$nuke_path
@@ -155,20 +143,19 @@ if [[ $launch_answer == [Yy]* ]]; then
     if [[ $nuke_non_commercial == [Yy]* ]]; then
         if [[ "$launch_nuke_path" == /opt/* || "$launch_nuke_path" == /usr/* ]]; then
             echo "The specified path may require sudo permissions."
-            echo $launcher_scrip_nc
-            sudo $launcher_scrip_nc
+            sudo launcher_scrip_nc
             sudo chmod +x $launch_nuke_path/nuke_launcher
         else
-            $launcher_scrip_nc
+            launcher_scrip_nc
             chmod +x $launch_nuke_path/nuke_launcher
         fi
     else
         if [[ "$launch_nuke_path" == /opt/* || "$launch_nuke_path" == /usr/* ]]; then
             echo "The specified path may require sudo permissions."
-            sudo $launcher_scrip
+            sudo launcher_scrip
             sudo chmod +x $launch_nuke_path/nuke_launcher
         else
-            $launcher_scrip
+            launcher_scrip
             chmod +x $launch_nuke_path/nuke_launcher
         fi
     fi        
