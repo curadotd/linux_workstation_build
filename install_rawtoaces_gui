@@ -29,8 +29,9 @@ current_dir=$(pwd)
 read -p "Do you want to install and setup rawtoaces_gui, a Pyside Gui App for converting Raw files to Aces exr file? (y/n) " install_rawtoaces_gui
 
 if [[ $install_rawtoaces_gui =~ ^[Yy]$ ]]; then
+    get_git_path()
     echo "Installing and setting up dwm-curado..."
-    git https://github.com/curadotd/rawtoaces_gui.git $GIT_PATH/rawtoaces_gui
+    git clone https://github.com/curadotd/rawtoaces_gui.git $GIT_PATH/rawtoaces_gui
     cd $GIT_PATH/rawtoaces_gui
     ./setup
     cd $current_dir
