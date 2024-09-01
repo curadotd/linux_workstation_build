@@ -90,115 +90,80 @@ nuke_version=$(echo "$installer" | grep -oP 'Nuke\K[0-9.v]+' | head -1)
 # Extract major version (e.g., 15.1 from 15.1v2)
 nuke_major_version=$(echo "$nuke_version" | grep -oP '^[0-9]+\.[0-9]+')
 
+launcher_scrip_nc(){
+    # Nuke Non-Commercial version
+    cat << EOF > $launch_nuke_path/nuke_launcher
+#!/bin/bash
+if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
+    echo "Usage:"
+    echo "  ./nuke_launcher       # Launch regular Nuke"
+    echo "  ./nuke_launcher x     # Launch NukeX"
+    echo "  ./nuke_launcher studio # Launch Nuke Studio"
+    exit 0
+fi
+
+if [ "\$1" == "x" ]; then
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nukex --nc
+elif [ "\$1" == "studio" ]; then
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --studio --nc
+else
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nc
+fi
+EOF
+}
+
+launcher_scrip(){
+    # Commercial version
+    cat << EOF > $launch_nuke_path/nuke_launcher
+#!/bin/bash
+if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
+    echo "Usage:"
+    echo "  ./nuke_launcher       # Launch regular Nuke"
+    echo "  ./nuke_launcher x     # Launch NukeX"
+    echo "  ./nuke_launcher studio # Launch Nuke Studio"
+    exit 0
+fi
+
+if [ "\$1" == "x" ]; then
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nukex
+elif [ "\$1" == "studio" ]; then
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --studio
+else
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version}
+fi
+EOF
+}
+
 # Ask user if they want to install Steam
 read -p "Do you to create a launch script (y/n): " launch_answer
 if [[ $launch_answer == [Yy]* ]]; then
 
     read -p "Enter the path where you want the launcher to be installed (e.g., /usr/local/bin): " launch_nuke_path
-    if [[ "$launch_nuke_path" == /opt/* || "$launch_nuke_path" == /usr/* ]]; then
-        echo "The specified path may require sudo permissions."
-
-        read -p "Are you running Nuke Non-Commercial? (y/n): " nuke_non_commercial
-        if [[ $nuke_non_commercial == [Yy]* ]]; then
-            # Nuke Non-Commercial version
-            sudo cat << EOF > $launch_nuke_path/nuke_launcher
-#!/bin/bash
-if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
-    echo "Usage:"
-    echo "  ./nuke_launcher       # Launch regular Nuke"
-    echo "  ./nuke_launcher x     # Launch NukeX"
-    echo "  ./nuke_launcher studio # Launch Nuke Studio"
-    exit 0
-fi
-
-if [ "\$1" == "x" ]; then
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nukex --nc
-elif [ "\$1" == "studio" ]; then
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --studio --nc
-else
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nc
-fi
-EOF
-            else
-        # Commercial version
-            sudo cat << EOF > $launch_nuke_path/nuke_launcher
-#!/bin/bash
-if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
-    echo "Usage:"
-    echo "  ./nuke_launcher       # Launch regular Nuke"
-    echo "  ./nuke_launcher x     # Launch NukeX"
-    echo "  ./nuke_launcher studio # Launch Nuke Studio"
-    exit 0
-fi
-
-if [ "\$1" == "x" ]; then
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nukex
-elif [ "\$1" == "studio" ]; then
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --studio
-else
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version}
-fi
-EOF
-            fi
-
+    read -p "Are you running Nuke Non-Commercial? (y/n): " nuke_non_commercial
+    if [[ $nuke_non_commercial == [Yy]* ]]; then
+        if [[ "$launch_nuke_path" == /opt/* || "$launch_nuke_path" == /usr/* ]]; then
+            echo "The specified path may require sudo permissions."
+            sudo $launcher_scrip_nc
             sudo chmod +x $launch_nuke_path/nuke_launcher
-
-            echo "Launch script created. Usage:"
-            echo "  ./nuke_launcher       # Launch regular Nuke"
-            echo "  ./nuke_launcher x     # Launch NukeX"
-            echo "  ./nuke_launcher studio # Launch Nuke Studio"
-    else
-
-        read -p "Are you running Nuke Non-Commercial? (y/n): " nuke_non_commercial
-        if [[ $nuke_non_commercial == [Yy]* ]]; then
-            # Nuke Non-Commercial version
-            cat << EOF > $launch_nuke_path/nuke_launcher
-#!/bin/bash
-if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
-    echo "Usage:"
-    echo "  ./nuke_launcher       # Launch regular Nuke"
-    echo "  ./nuke_launcher x     # Launch NukeX"
-    echo "  ./nuke_launcher studio # Launch Nuke Studio"
-    exit 0
-fi
-
-if [ "\$1" == "x" ]; then
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nukex --nc
-elif [ "\$1" == "studio" ]; then
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --studio --nc
-else
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nc
-fi
-EOF
         else
-            # Commercial version
-            cat << EOF > $launch_nuke_path/nuke_launcher
-#!/bin/bash
-if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
-    echo "Usage:"
+            $launcher_scrip_nc
+            chmod +x $launch_nuke_path/nuke_launcher
+        fi
+    else
+        if [[ "$launch_nuke_path" == /opt/* || "$launch_nuke_path" == /usr/* ]]; then
+            echo "The specified path may require sudo permissions."
+            sudo $launcher_scrip
+            sudo chmod +x $launch_nuke_path/nuke_launcher
+        else
+            $launcher_scrip
+            chmod +x $launch_nuke_path/nuke_launcher
+        fi
+    fi        
+
+    echo "Launch script created. Usage:"
     echo "  ./nuke_launcher       # Launch regular Nuke"
     echo "  ./nuke_launcher x     # Launch NukeX"
     echo "  ./nuke_launcher studio # Launch Nuke Studio"
-    exit 0
-fi
-
-if [ "\$1" == "x" ]; then
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nukex
-elif [ "\$1" == "studio" ]; then
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --studio
-else
-    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version}
-fi
-EOF
-        fi
-
-        chmod +x $launch_nuke_path/nuke_launcher
-
-        echo "Launch script created. Usage:"
-        echo "  ./nuke_launcher       # Launch regular Nuke"
-        echo "  ./nuke_launcher x     # Launch NukeX"
-        echo "  ./nuke_launcher studio # Launch Nuke Studio"
-    fi
 else
     echo "Launch script not created."
 fi
