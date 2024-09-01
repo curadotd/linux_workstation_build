@@ -13,6 +13,7 @@ fi
 
 # Function to install dependencies
 install_dependencies() {
+    echo "Installing Dependencies..."
     case "$OS" in
         "Ubuntu" | "Debian GNU/Linux")
             sudo apt update
@@ -62,7 +63,6 @@ if [ -z "$install_file" ]; then
 fi
 
 # Install dependencies
-echo "Installing dependencies for $distro..."
 $install_dependencies
 
 # Run the installer
