@@ -23,7 +23,7 @@ install_dependencies() {
             ;;
         debian)
             sudo apt update
-            sudo apt install libgl1-mesa-glx libxcb1 libxcb-keysyms1 libxcb-util1 libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-xinerama0 avahi
+            sudo apt install libgl1 libglx-mesa0 libxcb1 libxcb-keysyms1 libxcb-util1 libxcb-icccm4 libxcb-image0 libxcb-render-util0 libxcb-xinerama0 avahi
             ;;
         rocky)
             sudo dnf update
