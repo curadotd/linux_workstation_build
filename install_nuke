@@ -1,33 +1,34 @@
 #!/bin/bash
 
-# Function to detect the Linux distribution
-detect_distro() {
-    if [ -f /etc/arch-release ]; then
-        echo "arch"
-    elif [ -f /etc/debian_version ]; then
-        echo "debian"
-    elif [ -f /etc/rocky-release ]; then
-        echo "rocky"
-    else
-        echo "unknown"
-    fi
-}
+
+# Detect the Linux distribution
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$NAME
+elif type lsb_release >/dev/null 2>&1; then
+    OS=$(lsb_release -si | grep -v "No LSB modules are available." | head -n1)
+else
+    OS=$(uname -s)
+fi 
 
 # Function to install dependencies
 install_dependencies() {
-    local distro=$1
-    case $distro in
-        arch)
-            sudo pacman -Syu
-            sudo pacman -S --needed libglvnd libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms
-            ;;
-        debian)
+    case "$OS" in
+        "Ubuntu" | "Debian GNU/Linux")
             sudo apt update
             sudo apt install libglu1-mesa libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0
             ;;
-        rocky)
+        "Rocky Linux")
             sudo dnf update
             sudo dnf install mesa-libGLU libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms
+            ;;
+        "Arch Linux")
+            sudo pacman -Syu
+            sudo pacman -S --needed libglvnd libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms
+            ;;
+        *)
+            echo "Unsupported distribution: $OS"
+            exit 1
             ;;
     esac
 }
@@ -69,7 +70,7 @@ fi
 
 # Install dependencies
 echo "Installing dependencies for $distro..."
-$install_dependencies $distro
+$install_dependencies $OS
 
 # Run the installer
 echo "Installing Nuke..."
