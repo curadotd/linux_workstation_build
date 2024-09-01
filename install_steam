@@ -4,12 +4,11 @@
 if [ -f /etc/os-release ]; then
     . /etc/os-release
     OS=$NAME
-elif [ -f /etc/lsb-release ]; then
-    . /etc/lsb-release
-    OS=$DISTRIB_ID
+elif type lsb_release >/dev/null 2>&1; then
+    OS=$(lsb_release -si | grep -v "No LSB modules are available." | head -n1)
 else
     OS=$(uname -s)
-fi
+fi  
 
 # Ask user if they want to install Steam
 read -p "Do you want to install Steam? (y/n): " steam_answer
