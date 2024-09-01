@@ -12,27 +12,27 @@ else
 fi 
 
 # Function to install dependencies
-install_dependencies() {
-    echo "Installing Dependencies..."
-    case "$OS" in
-        "Ubuntu" | "Debian GNU/Linux")
-            sudo apt update
-            sudo apt install libglu1-mesa libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0
-            ;;
-        "Rocky Linux")
-            sudo dnf update
-            sudo dnf install mesa-libGLU libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms
-            ;;
-        "Arch Linux")
-            sudo pacman -Syu
-            sudo pacman -S --needed libglvnd libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms
-            ;;
-        *)
-            echo "Unsupported distribution: $OS"
-            exit 1
-            ;;
-    esac
-}
+
+echo "Installing Dependencies..."
+case "$OS" in
+    "Ubuntu" | "Debian GNU/Linux")
+        sudo apt update
+        sudo apt install libglu1-mesa libxcb-xinerama0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0
+        ;;
+    "Rocky Linux")
+        sudo dnf update
+        sudo dnf install mesa-libGLU libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms
+        ;;
+    "Arch Linux")
+        sudo pacman -Syu
+        sudo pacman -S --needed libglvnd libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms
+        ;;
+    *)
+        echo "Unsupported distribution: $OS"
+        exit 1
+        ;;
+esac
+
 
 # Main script
 echo "Foundry Nuke Installation Script"
@@ -61,9 +61,6 @@ if [ -z "$install_file" ]; then
     echo "Extracted Nuke directory not found. Installation failed."
     exit 1
 fi
-
-# Install dependencies
-$install_dependencies
 
 # Run the installer
 echo "Installing Nuke..."
