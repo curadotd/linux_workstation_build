@@ -1,0 +1,41 @@
+#! /bin/bash
+
+get_git_path() {
+    # Check if GIT_PATH is already set
+    if [ -z "$GIT_PATH" ]; then
+        read -p "Do you want to create a default location for git repositories? (y/n) " create_git_dir
+        if [[ $create_git_dir =~ ^[Yy]$ ]]; then
+            read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+            GIT_PATH=$git_path
+            export GIT_PATH
+            
+            if [ ! -d "$GIT_PATH" ]; then
+                mkdir -p "$GIT_PATH"
+                echo "Created git directory at $GIT_PATH"
+            else
+                echo "Git directory already exists at $GIT_PATH"
+            fi
+        else
+            echo "Skipping git directory creation."
+        fi
+    else
+        echo "GIT_PATH is already set to $GIT_PATH"
+    fi
+}
+
+current_dir=$(pwd)
+
+# Ask user if they want to install and setup rawtoaces_gui
+read -p "Do you want to install and setup rawtoaces_gui, a Pyside Gui App for converting Raw files to Aces exr file? (y/n) " install_rawtoaces_gui
+
+if [[ $install_rawtoaces_gui =~ ^[Yy]$ ]]; then
+    echo "Installing and setting up dwm-curado..."
+    git https://github.com/curadotd/rawtoaces_gui.git $GIT_PATH/rawtoaces_gui
+    cd $GIT_PATH/rawtoaces_gui
+    ./setup
+    cd $current_dir
+    # Add any additional configuration steps
+else
+    echo "Skipping rawtoaces_gui installation and setup."
+    exit 0
+fi
