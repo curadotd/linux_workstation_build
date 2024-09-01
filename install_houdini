@@ -92,7 +92,7 @@ houdini_version=$(echo "$installer" | grep -oP 'houdini-\K[0-9.]+')
 
 # Run the installer
 echo "Installing Houdini $version_name..."
-read -p "Enter the path where Houdini should be installed (e.g., /opt/hfs-$houdini_version): " houdini_path
+read -p "Enter the path where Houdini should be installed (e.g., /opt/SideFx/houdini): " houdini_path
 
 # Check if the user has write permissions to the chosen path
 if [ -w "$(dirname "$houdini_path")" ]; then
@@ -104,14 +104,14 @@ fi
 
 eula_date=$(grep -oP 'LICENSE_DATE="\K[0-9-]+' ./houdini.install)
 if [ -n "$eula_date" ]; then
-    $install_command  --install-engine-unreal --no-install-houdini --auto-install "$houdini_path"
+    echo "Got eula_date"
 else
     echo "Error: Could not find EULA date in houdini.install script."
     exit 1
 fi
 
 $install_command --accept-EULA $eula_date --install-houdini --no-install-license --no-install-menus --no-install-bin-symlink \
---install-sidefxlabs --make-dir --no-root-check --no-install-hfs-symlink --auto-install "$houdini_path"
+--install-sidefxlabs --make-dir --no-root-check --no-install-hfs-symlink --auto-install "$houdini_path/hfs-$houdini_version"
 
 # Ask about engine plugins
 read -p "Do you want to install the Maya engine plugin? (y/n): " install_maya
@@ -119,15 +119,15 @@ read -p "Do you want to install the Unity engine plugin? (y/n): " install_unity
 read -p "Do you want to install the Unreal engine plugin? (y/n): " install_unreal
 
 if [[ $install_maya == [Yy]* ]]; then
-    $install_command --accept-EULA $eula_date --install-engine-maya --no-install-houdini --auto-install  "$houdini_path"
+    $install_command --accept-EULA $eula_date --install-engine-maya --no-install-houdini --auto-install  "$houdini_path/hfs-$houdini_version"
 fi
 
 if [[ $install_unity == [Yy]* ]]; then
-    $install_command --accept-EULA $eula_date --install-engine-unity --no-install-houdini --auto-install "$houdini_path"
+    $install_command --accept-EULA $eula_date --install-engine-unity --no-install-houdini --auto-install "$houdini_path/hfs-$houdini_version"
 fi
 
 if [[ $install_unreal == [Yy]* ]]; then
-    $install_command --accept-EULA $eula_date --accept-EULA $eula_date --install-engine-unreal --no-install-houdini --auto-install "$houdini_path"
+    $install_command --accept-EULA $eula_date --accept-EULA $eula_date --install-engine-unreal --no-install-houdini --auto-install "$houdini_path/hfs-$houdini_version"
 fi
 
 # Check if /etc/init.d exists and create it if not
