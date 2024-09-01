@@ -10,6 +10,21 @@ else
     OS=$(uname -s)
 fi  
 
+# Check if the user is on Debian sid or bookworm
+if [[ "$OS" == "Debian GNU/Linux" ]]; then
+    if grep -q "deb http://deb.debian.org/debian/ sid main contrib non-free" /etc/apt/sources.list; then
+        echo "Debian sid repository already exists."
+    elif grep -q "deb http://deb.debian.org/debian/ bookworm main contrib non-free" /etc/apt/sources.list; then
+        echo "Debian bookworm repository already exists."
+    else
+        echo "Adding Debian sid repository to sources list..."
+        echo "deb http://deb.debian.org/debian/ sid main contrib non-free" | sudo tee -a /etc/apt/sources.list
+        # Optionally, you can add bookworm support here if needed
+        # echo "deb http://deb.debian.org/debian/ bookworm main contrib non-free" | sudo tee -a /etc/apt/sources.list
+    fi
+fi
+
+
 # Ask user if they want to install Steam
 read -p "Do you want to install Steam? (y/n): " steam_answer
 if [[ $steam_answer == [Yy]* ]]; then
@@ -17,6 +32,7 @@ if [[ $steam_answer == [Yy]* ]]; then
 
     case "$OS" in
         "Ubuntu" | "Debian GNU/Linux")
+            sudo dpkg --add-architecture i386
             sudo apt install wine64 wine32 libasound2-plugins:i386 libsdl2-2.0-0:i386 libdbus-1-3:i386 \
             libsqlite3-0:i386
             sudo apt install steam
