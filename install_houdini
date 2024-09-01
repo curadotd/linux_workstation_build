@@ -177,8 +177,10 @@ export HOUDINI_VERSION="hfs-$houdini_version"
 export HOUDINI_OCL_DEVICETYPE=GPU
 export HOUDINI_USE_HFS_OCL=0
 
+cd \$HOUDINI_ROOT_PATH/\$HOUDINI_VERSION
 
-source \$HOUDINI_ROOT_PATH/\$HOUDINI_VERSION
+source houdini_setup
+
 if [ "\$1" == "fx" ]; then
     houdinifx
 elif [ "\$1" == "core" ]; then
