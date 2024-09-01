@@ -100,12 +100,12 @@ if [[ $launch_answer == [Yy]* ]]; then
         nc="--nc"
     else
         nc=""
-        if [[ "$launch_nuke_path" == /opt/* || "$launch_nuke_path" == /usr/* ]]; then
-            sudoer="sudo"
-        else
-            sudoer=""
-        fi
-    fi        
+    fi
+    if [[ "$launch_nuke_path" == /opt/* || "$launch_nuke_path" == /usr/* ]]; then
+        sudoer="sudo"
+    else
+        sudoer=""
+    fi
 
     $sudoer tee -a $launch_nuke_path/nuke_launcher >/dev/null <<'EOF'
 #!/bin/bash
