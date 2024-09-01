@@ -154,8 +154,8 @@ if [[ $launch_answer == [Yy]* ]]; then
     else
         sudo_prefix=""
     fi
-
-    $sudo_prefix cat << EOF > $launch_houdini_path/houdini_launcher
+    
+    $sudo_prefix tee -a $launch_houdini_path/houdini_launcher >/dev/null << EOF
 #!/bin/bash
 if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
     echo "Usage:"
