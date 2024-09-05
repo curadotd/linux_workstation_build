@@ -24,6 +24,7 @@ install_gh() {
     case $distro in
         arch)
             sudo pacman -Sy --needed github-cli vim
+            yay --needed git-completion
             ;;
         debian)
             curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
