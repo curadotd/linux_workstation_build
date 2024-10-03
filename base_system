@@ -88,18 +88,26 @@ fi
 # Ask user about desktop environment
 echo "Which desktop environment would you like to install?"
 echo "1) DWM"
-echo "2) MATE"
-echo "3) None"
-read -p "Enter your choice (1/2/3): " de_choice
+echo "2) Hyprland"
+echo "3) MATE"
+echo "4) KDE"
+echo "5) None"
+read -p "Enter your choice (1/2/3/4/5): " de_choice
 
 case $de_choice in
     1)
         ./install_dwm
         ;;
     2)
-        ./install_mate_desktop
+        ./install_hyprland
         ;;
     3)
+        ./install_mate_desktop
+        ;;
+    4)
+        ./install_plasma_desktop
+        ;;    
+    5)
         echo "Skipping desktop environment installation."
         ;;
     *)
