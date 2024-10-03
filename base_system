@@ -117,6 +117,7 @@ esac
 
 cd $current_dir
 
+./install_display_manager
 ./install_starship
 ./clone_dotconfig
 ./install_tokyo_nights_theme

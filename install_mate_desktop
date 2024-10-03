@@ -29,10 +29,6 @@ if [[ $install_mate =~ ^[Yy]$ ]]; then
             mate-session-manager mate-settings-daemon mate-system-log mate-system-monitor mate-terminal \
             mate-themes mate-user-admin mate-user-guide mozo network-manager-applet nm-connection-editor \
             p7zip p7zip-plugins pluma seahorse seahorse-caja xdg-user-dirs-gtk
-
-            sudo dnf install lightdm-settings lightdm
-            
-            sudo systemctl set-default graphical.target
             ;;
         "Debian GNU/Linux" | "Ubuntu")
             sudo apt update
