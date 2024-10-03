@@ -1,0 +1,79 @@
+#!/bin/bash
+
+
+# Ask user if they want to install pciop-client
+read -p "Do you want to compile and install OpenRV? (y/n) " install_openrv
+
+current_dir=$(pwd)
+
+if [[ $install_openrv =~ ^[Yy]$ ]]; then
+
+    #Add some envs
+    export PIP_BREAK_SYSTEM_PACKAGES=1
+    read -p "Please enter the path where you have installed Qt (e.g., /mnt/repository/software/install/linux/Qt/5.15.2/gcc_64): " qt_home
+    export QT_HOME="$qt_home"
+    read -p "Please enter the installation path for OpenRV (e.g., /mnt/repository/software/install/linux/ASF/rv): " rv_inst
+    export RV_INST="$rv_inst"
+
+    # Function to install dependencies for Debian-based systems
+    install_debian_dependencies() {
+        sudo apt update
+        sudo apt install -y build-essential cmake git python3 python3-pip qt5-default pre-commit
+    }
+
+    # Function to install dependencies for Rocky Linux
+    install_rocky_dependencies() {
+        sudo dnf groupinstall "Development Tools"
+        sudo dnf install cmake git python3 python3-pip qt5-qtbase-devel
+        sudo dnf install epel-release
+        sudo dnf config-manager --set-enabled crb devel
+        sudo dnf install alsa-lib-devel autoconf automake avahi-compat-libdns_sd-devel bison bzip2-devel \
+        cmake-gui curl-devel flex gcc gcc-c++ libXcomposite libXi-devel libaio-devel libffi-devel nasm \
+        ncurses-devel nss libtool libxkbcommon libXcomposite libXdamage libXrandr libXtst libXcursor \
+        mesa-libOSMesa mesa-libOSMesa-devel meson ninja-build openssl-devel patch perl-FindBin \
+        pulseaudio-libs pulseaudio-libs-glib2 ocl-icd ocl-icd-devel opencl-headers python3 python3-devel \
+        qt5-qtbase-devel readline-devel sqlite-devel tcl-devel tcsh tk-devel yasm zip zlib-devel pre-commit
+    }
+
+    # Function to install dependencies for Arch Linux
+    install_arch_dependencies() {
+        sudo pacman -Syu
+        sudo pacman -S --needed alsa-lib autoconf automake avahi bison bzip2 cmake curl flex gcc gcc \
+        libxcomposite libxi libaio libffi nasm ncurses nss libtool xkeyboard-config libxcomposite \
+        libxdamage libxrandr libxtst libxcursor mesa meson ninja openssl patch perl glib2 ocl-icd \
+        ocl-icd opencl-headers python python qt5-base readline sqlite tcl tcsh tk yasm zip zlib glu pre-commit
+    }
+
+    # Clone the OpenRV repository
+    git clone --recursive https://github.com/AcademySoftwareFoundation/OpenRV.git
+    cd OpenRV || exit
+
+    # Detect the OS and install dependencies
+    if [ -f /etc/debian_version ]; then
+        echo "Detected Debian-based system."
+        install_debian_dependencies
+    elif [ -f /etc/redhat-release ]; then
+        echo "Detected Rocky Linux."
+        install_rocky_dependencies
+    elif [ -f /etc/arch-release ]; then
+        echo "Detected Arch Linux."
+        install_arch_dependencies
+    else
+        echo "Unsupported OS. Please install dependencies manually."
+        exit 1
+    fi
+
+    # Bootstrap, build, and install OpenRV
+    pre-commit install
+    python3 -m pip install -r requirements.txt
+
+    source rvcmds.sh
+    rvsetup
+    rvcfg -DRV_FFMPEG_NON_FREE_DECODERS_TO_ENABLE="aac;hevc" -DRV_FFMPEG_NON_FREE_ENCODERS_TO_ENABLE="aac"
+
+    
+
+    echo "OpenRV installation completed."
+else
+    echo "Skiping OpenRV compile and install"
+fi

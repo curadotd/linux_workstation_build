@@ -1,0 +1,41 @@
+#!/bin/bash
+
+echo "Do you want to install the Plasma desktop environment? (y/n)"
+read -r install_plasma
+
+if [[ $install_plasma =~ ^[Yy]$ ]]; then
+    # Determine the operating system
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        OS=$NAME
+    elif type lsb_release >/dev/null 2>&1; then
+        OS=$(lsb_release -si | grep -v "No LSB modules are available." | head -n1)
+    else
+        OS=$(uname -s)
+    fi  
+
+    case $OS in
+        "Rocky Linux")
+            sudo dnf install plasma-desktop \
+            # ... other necessary Plasma packages ...
+            sudo dnf install lightdm-settings lightdm
+            
+            sudo systemctl set-default graphical.target
+            ;;
+        "Debian GNU/Linux" | "Ubuntu")
+            sudo apt update
+            sudo apt install task-plasma-desktop
+            ;;
+        "Arch Linux")
+            sudo pacman -S plasma wlr-randr --needed
+            ;;
+        *)
+            echo "Unsupported operating system: $OS"
+            exit 1
+            ;;
+    esac
+
+    echo "Plasma desktop environment has been installed. Please reboot your system to apply changes."
+else
+    echo "Plasma desktop installation skipped."
+fi

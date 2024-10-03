@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Function to install dependencies for Debian/Ubuntu
+install_debian() {
+    sudo apt update
+    sudo apt install build-essential cmake git python3 python3-pip
+}
+
+# Function to install dependencies for Rocky Linux
+install_rocky() {
+    sudo dnf groupinstall "Development Tools"
+    sudo dnf install cmake git python3 python3-pip doxygen python3-pyopengl libXt-devel ncurses-compat-libs
+    pip install PySide6 PyOpenGL
+}
+
+# Function to install dependencies for Arch Linux
+install_arch() {
+    sudo pacman -S --needed base-devel cmake git python python-pip python-opengl
+    yay -S --needed pyside6-tools-wrappers
+}
+
+# Function to clone and build OpenUSD
+build_opendusd() {
+    git clone https://github.com/PixarAnimationStudios/OpenUSD.git
+    cd OpenUSD
+    python build_scripts/build_usd.py --ptex \
+    --openvdb --prman --prman-location /mnt/repository/software/install/linux/pixar/RenderManProServer-25.2 \
+    --openimageio --opencolorio  --alembic --hdf5 --materialx /mnt/repository/software/install/linux/pixar/OpenUSD
+}
+
+# Detect the OS
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    case $ID in
+        debian|ubuntu)
+            install_debian
+            ;;
+        rocky)
+            install_rocky
+            ;;
+        arch)
+            install_arch
+            ;;
+        *)
+            echo "Unsupported OS: $ID"
+            exit 1
+            ;;
+    esac
+else
+    echo "OS not supported."
+    exit 1
+fi
+
+# Build OpenUSD
+build_opendusd
+
+echo "OpenUSD installation completed."
