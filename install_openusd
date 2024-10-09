@@ -15,7 +15,7 @@ install_rocky() {
 
 # Function to install dependencies for Arch Linux
 install_arch() {
-    sudo pacman -S --needed base-devel cmake git python python-pip python-opengl
+    sudo pacman -S --needed base-devel cmake git python python-pip python-opengl pyside6 pyside6-tools python-distutils-extra
     yay -S --needed pyside6-tools-wrappers
 }
 
@@ -36,6 +36,9 @@ if [ -f /etc/os-release ]; then
             install_debian
             ;;
         rocky)
+            export PATH=$PATH:$HOME/.local/bin
+            export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/.local/lib
+            export INCLUDE_PATH=$INCLUDE_PATH:$HOME/.local/include
             install_rocky
             ;;
         arch)
