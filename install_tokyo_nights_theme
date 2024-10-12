@@ -38,9 +38,16 @@ if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         
     cd $git_path/Tokyo-Night-Linux
         
+    # Check if the destination folder exists, if not create it
+    if [ ! -d "/usr/share/themes" ]; then
+        sudo mkdir -p /usr/share/themes
+        echo "Created /usr/share/themes directory"
+    fi
+
     # Check if TokyoNight theme directory exists before copying
     if [ ! -d "/usr/share/themes/TokyoNight" ]; then
         sudo cp -R usr/share/themes/TokyoNight /usr/share/themes/
+        echo "Copied TokyoNight theme to /usr/share/themes/"
     else
         echo "TokyoNight theme directory already exists. Skipping copy."
     fi
