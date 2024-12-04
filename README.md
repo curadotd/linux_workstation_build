@@ -14,7 +14,7 @@ apt install sudo git vim
 ```
 Now add your username to sudo.
 ```sh
-sudo usermd -aG sudo username
+sudo usermod -aG sudo username
 ```
 Once you log out or reboot.
 
