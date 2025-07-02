@@ -71,7 +71,7 @@ case $DISTRO in
 
         ./install_yay
 
-        yay -S --needed swaylock-effects hyprpicker grimblast-git
+        yay -S --needed swaylock-effects hyprpicker grimblast-git wlogout
         ;;
 esac
 
