@@ -8,7 +8,10 @@ fi
 current_dir=$(pwd)
 
 install_fonts_arch() {
-    sudo pacman -S ttf-fira-code ttf-meslo-nerd ttf-font-awesome --needed
+    sudo pacman -S ttf-fira-code ttf-meslo-nerd ttf-font-awesome ttf-firacode-nerd otf-font-awesome --needed
+    ./install_yay
+
+    yay -S --needed ttf-comfortaa ttf-icomoon-feather wlogout ttf-icomoon-feather tela-icon-theme nordzy-icon-theme otf-sora
 }
 
 install_fonts_manual() {
