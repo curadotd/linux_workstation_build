@@ -3,7 +3,8 @@
 echo "Select Display Manager to install:"
 echo "1) SDDM"
 echo "2) LightDM"
-read -p "Enter your choice (1 or 2): " choice
+echo "3) Skip"
+read -p "Enter your choice (1): " choice
 
 # Detect the OS
 if [[ -f /etc/os-release ]]; then
@@ -62,6 +63,8 @@ case $OS in
         elif [[ $choice -eq 2 ]]; then
             sudo pacman -S --needed lightdm lightdm-gtk-greeter
             sudo systemctl enable lightdm
+        elif [[ $choice -eq 3 ]]; then
+            exit 1
         else
             echo "Invalid choice"
             exit 1
