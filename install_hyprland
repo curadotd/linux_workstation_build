@@ -65,15 +65,13 @@ case $DISTRO in
     arch)
         echo "Installing Hyprland, SDDM, and other packages on Arch Linux..."
         sudo pacman -S --needed hyprland xdg-desktop-portal-hyprland xorg-xwayland qt5-wayland qt6-wayland qt5ct libva \
-        ttf-firacode-nerd neofetch nwg-look rofi qt5ct kitty jq lm_sensors gtk3 gtk4 xdg-desktop-portal \
-        polkit-kde-agent ffmpeg ffmpegthumbs dunst btop thunar thunar-archive-plugin pamixer networkmanager gedit mattermost-desktop \
-        mlocate strace xorg-xhost cmake starship openrgb i2c-tools krita krita-plugin-gmic htop lxappearance pavucontrol wl-clipboard \
-        waybar otf-font-awesome ttf-font-awesome imagemagick wl-clipboard blueman cliphist shotwell sddm waybar wlr-randr
+        nwg-look rofi qt5ct jq gtk3 gtk4 xdg-desktop-portal polkit-kde-agent dunst thunar thunar-archive-plugin pamixer \
+        xorg-xhost i2c-tools lxappearance pavucontrol wl-clipboard \
+        waybar wl-clipboard blueman cliphist shotwell wlr-randr
 
         ./install_yay
 
-        yay -S --needed sddm-theme-tokyo-night-git tela-icon-theme nordzy-icon-theme otf-sora swaylock-effects \
-        ttf-comfortaa ttf-icomoon-feather wlogout ttf-icomoon-feather hyprpicker grimblast-git
+        yay -S --needed swaylock-effects hyprpicker grimblast-git
         ;;
 esac
 
