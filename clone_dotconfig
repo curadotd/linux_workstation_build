@@ -45,6 +45,10 @@ if [[ $use_dotconfig =~ ^[Yy]$ ]]; then
     cp -R kitty $HOME/.config/
     cp -R MangoHud $HOME/.config/
     cp -R rofi $HOME/.config/
+    cp -R hypr $HOME/.config/
+    cp -R nwg-look $HOME/.config/
+    cp -R rofi $HOME/.config/
+    cp -R waybar $HOME/.config/
     cp -R gamemode.ini $HOME/.config/
     cp -R starship.toml $HOME/.config/
     cp -R user-dirs.dirs $HOME/.config/
