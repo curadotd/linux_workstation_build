@@ -3,6 +3,8 @@
 # Arch Linux Installation Script - Part 1 (Live Environment)
 # This script automates the initial Arch Linux installation steps up to chroot.
 
+set -e  # Exit on any error
+
 # Pre-installation manual steps
 pre_installation_instructions() {
     echo
