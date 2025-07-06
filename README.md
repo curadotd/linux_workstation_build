@@ -1,6 +1,11 @@
 # linux_workstation_build
 Some convenience scripts to setup a workstation build for use in VFX, Animation and Photography for Linux desktops using DWM Window Manager or Mate Desktop.
 
+If you are doing a clean arsh install, I have done a quick setup for installing the basic packages and setting up btrfs and snapshots.
+
+```sh
+curl -fsSL https://github.com/curadotd/linux_workstation_build/blob/main/arch_install/arch_install_part1.sh | sh
+```
 Debian, Rocky and Arch Linux, so far tested.
 
 On Debian, you might need to add SUDO to your groups.
