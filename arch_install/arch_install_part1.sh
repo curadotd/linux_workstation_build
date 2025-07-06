@@ -10,11 +10,11 @@ pre_installation_instructions() {
     echo
     echo "==================== PRE-INSTALLATION STEPS ===================="
     echo "Before running this script, you must manually:"
-    echo "  1. Connect to WiFi using: iwctl"
+    echo "  1. Connect to the Internet using Wired Lan or WiFi using: iwctl"
     echo "     (Example: 'iwctl', then 'station device connect SSID')"
     echo "  2. Partition your disk using: cgdisk <your-disk>"
     echo "     (Create 3 partitions: EFI (type EF00), root (type 8300), swap (type 8200))"
-    echo "  3. Test your WiFi connection: ping -c 3 archlinux.org"
+    echo "  3. Test your Network connection: ping -c 3 archlinux.org"
     echo "  4. Re-run this script to continue installation."
     echo "==============================================================="
     echo
@@ -29,9 +29,9 @@ pre_installation_instructions() {
 # Test WiFi connectivity
 check_internet() {
     if ping -c 1 archlinux.org &> /dev/null; then
-        echo "[INFO] WiFi connection detected."
+        echo "[INFO] Internet connection detected."
     else
-        echo "[ERROR] No WiFi connection. Please connect to WiFi and try again."
+        echo "[ERROR] No Internet connection. Please connect to Internet and try again."
         exit 1
     fi
 }
@@ -151,6 +151,21 @@ check_root() {
     fi
 }
 
+# Function to check if we're running Arch Linux
+check_arch_distro() {
+    if [[ -f /etc/os-release ]]; then
+        source /etc/os-release
+        if [[ "$ID" != "arch" ]]; then
+            print_error "This script is designed for Arch Linux. Detected: $ID"
+            print_error "Please run this script on an Arch Linux live environment."
+            exit 1
+        fi
+        print_success "Arch Linux detected: $PRETTY_NAME"
+    else
+        print_warning "Could not detect OS release file. Proceeding with caution..."
+    fi
+}
+
 # Function to check if we're in the live environment
 check_live_environment() {
     if ! mountpoint -q /mnt; then
@@ -259,6 +274,7 @@ main() {
     print_warning "This script will completely erase the target disk!"
     
     # Call pre-installation instructions
+    check_arch_distro
     pre_installation_instructions
 
     # Get configuration from user
