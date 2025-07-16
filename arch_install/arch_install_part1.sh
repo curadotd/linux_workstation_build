@@ -199,7 +199,17 @@ format_partitions() {
     
     # Format root partition
     mkfs.btrfs ${DISK}p2 -f
-    
+
+    # Format workdriver
+    DISK2="/dev/nvme0n1"
+
+    if [ "$DISK" = "$DISK2" ]; then
+      echo "Devices are the same. Doing nothing."
+    else
+      echo "Devices are different. Formatting $DISK2..."
+      mkfs.ext4 "$DISK2"
+    fi
+
     # Format swap partition
     mkswap ${DISK}p3
     
@@ -246,6 +256,15 @@ mount_filesystem() {
     
     # Mount EFI partition
     mount ${DISK}p1 /mnt/boot
+
+    # Mount repository
+    if [ "$DISK" = "$DISK2" ]; then
+      echo "Devices are the same. Doing nothing."
+    else
+      echo "Mounting $DISK2 to /mnt/mnt/repository"
+      mkdir -p /mnt/mnt/repository
+      mount $DISK2 /mnt/mnt/repository
+    fi
     
     # Enable swap
     swapon ${DISK}p3
