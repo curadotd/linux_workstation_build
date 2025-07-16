@@ -39,7 +39,7 @@ setup_snapshots() {
     sudo snapper -c root create-config /
     
     # Configure snapper
-    sudo cat > /etc/snapper/configs/root << EOF
+    sudo tee /etc/snapper/configs/root > /dev/null << EOF
 SUBVOLUME="/"
 SNAPSHOT_CREATE=yes
 TIMELINE_CREATE=yes
