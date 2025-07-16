@@ -36,10 +36,10 @@ setup_snapshots() {
     sudo umount /.snapshots
     sudo rm -rf /.snapshots
     # Create snapper config
-    snapper -c root create-config /
+    sudo snapper -c root create-config /
     
     # Configure snapper
-    cat > /etc/snapper/configs/root << EOF
+    sudo cat > /etc/snapper/configs/root << EOF
 SUBVOLUME="/"
 SNAPSHOT_CREATE=yes
 TIMELINE_CREATE=yes
@@ -54,8 +54,8 @@ finalize_installation() {
     print_status "Finalizing installation..."
     
     # Enable timed snapshots
-    systemctl enable snapper-timeline.timer
-    systemctl enable snapper-cleanup.timer
+    sudo systemctl enable snapper-timeline.timer
+    sudo systemctl enable snapper-cleanup.timer
     
     print_success "Installation finalized"
 }
