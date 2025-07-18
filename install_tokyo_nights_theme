@@ -28,7 +28,13 @@ if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
     fi
 
     echo "Installing Tokyo Night theme..."
-        
+
+    # Detect the operating system
+    if [ -f /etc/arch-release ]; then
+        # Arch Linux
+        yay -S --needed tokyonight-extra tokyonight-gtk-theme-git sddm-theme-tokyo-night-git xcursor-simp1e-tokyo-night
+    fi
+
     # Check if Tokyo-Night-Linux directory already exists
     if [ ! -d "$GIT_PATH/Tokyo-Night-Linux" ]; then
         git clone https://github.com/stronk-dev/Tokyo-Night-Linux.git $GIT_PATH/Tokyo-Night-Linux
