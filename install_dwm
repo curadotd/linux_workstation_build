@@ -31,6 +31,19 @@ current_dir=$(pwd)
 read -p "Do you want to install and setup dwm-curado, a fork of dwm-titus? (y/n) " install_dwm_curado
 
 if [[ $install_dwm_curado =~ ^[Yy]$ ]]; then
+
+    # Detect the operating system
+    if [ -f /etc/arch-release ]; then
+        # Arch Linux
+        sudo pacman -S pavucontrol
+    elif [ -f /etc/debian_version ]; then
+        # Debian/Ubuntu
+        sudo apt install pavucontrol
+    else
+        echo "Unsupported operating system. Please install Starship manually."
+        exit 1
+    fi
+
     echo "Installing and setting up dwm-curado..."
     git clone https://github.com/curadotd/dwm-curado.git $GIT_PATH/dwm-curado
     cd $GIT_PATH/dwm-curado
