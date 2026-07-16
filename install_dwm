@@ -35,7 +35,7 @@ if [[ $install_dwm_curado =~ ^[Yy]$ ]]; then
     # Detect the operating system
     if [ -f /etc/arch-release ]; then
         # Arch Linux
-        sudo pacman -S pavucontrol
+        sudo pacman -S pavucontrol lxappearance
     elif [ -f /etc/debian_version ]; then
         # Debian/Ubuntu
         sudo apt install pavucontrol

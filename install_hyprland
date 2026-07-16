@@ -32,7 +32,7 @@ case $DISTRO in
         libpixman-1-dev libudev-dev libseat-dev seatd libxcb-dri3-dev libvulkan-dev libvulkan-volk-dev vulkan-validationlayers-dev \
         libvkfft-dev libgulkan-dev libegl-dev libgles2 libegl1-mesa-dev glslang-tools libinput-bin libinput-dev libxcb-composite0-dev \
         libavutil-dev libavcodec-dev libavformat-dev libxcb-ewmh2 libxcb-ewmh-dev libxcb-present-dev libxcb-icccm4-dev \
-        libxcb-render-util0-dev libxcb-res0-dev libxcb-xinput-dev sddm waybar
+        libxcb-render-util0-dev libxcb-res0-dev libxcb-xinput-dev sddm waybar qt6ct hyprtoolkit hyprlauncher
 
         current_dir=$(pwd)
         # Check if GIT_PATH is already set
@@ -63,15 +63,15 @@ case $DISTRO in
         cd $current_dir
         ;;
     arch)
-        echo "Installing Hyprland, SDDM, and other packages on Arch Linux..."
-        sudo pacman -S --needed hyprland xdg-desktop-portal-hyprland xorg-xwayland qt5-wayland qt6-wayland qt5ct libva \
-        nwg-look rofi qt5ct jq gtk3 gtk4 xdg-desktop-portal polkit-kde-agent dunst thunar thunar-archive-plugin pamixer \
-        xorg-xhost i2c-tools lxappearance pavucontrol wl-clipboard \
-        waybar wl-clipboard blueman cliphist shotwell wlr-randr
+        echo "Installing Hyprland and other packages on Arch Linux..."
+        sudo pacman -S --needed hyprland xdg-desktop-portal-hyprland xorg-xwayland qt5-wayland qt6-wayland qt5ct qt6ct libva \
+        nwg-look jq gtk3 gtk4 xdg-desktop-portal dunst dolphin pamixer xdg-desktop-portal-gtk \
+        xorg-xhost i2c-tools pavucontrol wl-clipboard hyprshot\
+        waybar blueman cliphist shotwell wlr-randr hyprlock hypridle hyprtoolkit hyprlauncher hyprpolkitagent 
 
         ./install_yay
 
-        yay -S --needed swaylock-effects hyprpicker grimblast-git wlogout pwvucontrol
+        yay -S --needed hyprpicker grimblast-git apple-fonts hyprshutdown-git
         ;;
 esac
 

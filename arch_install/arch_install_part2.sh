@@ -231,14 +231,31 @@ setup_grub() {
 install_additional_packages() {
     print_status "Installing additional packages..."
     
-    # Install KDE and additional packages
-    pacman -S --noconfirm \
-        networkmanager bluez bluez-utils \
-        pipewire wireplumber \
-        power-profiles-daemon \
-        powerdevil \
-        amd-ucode \
-        fastfetch
+    # Detect CPU vendor and set appropriate microcode package
+    CPU_VENDOR=$(grep -m1 vendor_id /proc/cpuinfo 2>/dev/null || echo "")
+    if echo "$CPU_VENDOR" | grep -qi "GenuineIntel"; then
+        UCODE_PKG="intel-ucode"
+        print_status "Detected Intel CPU, installing intel-ucode"
+    elif echo "$CPU_VENDOR" | grep -qi "AuthenticAMD"; then
+        UCODE_PKG="amd-ucode"
+        print_status "Detected AMD CPU, installing amd-ucode"
+    else
+        UCODE_PKG=""
+        print_warning "Could not detect CPU vendor, skipping microcode installation"
+    fi
+    
+    # Install additional packages
+    # Base packages
+    BASE_PACKAGES="networkmanager bluez bluez-utils pipewire wireplumber power-profiles-daemon powerdevil fastfetch"
+    
+    # Add microcode if detected
+    if [[ -n "$UCODE_PKG" ]]; then
+        ALL_PACKAGES="$BASE_PACKAGES $UCODE_PKG"
+    else
+        ALL_PACKAGES="$BASE_PACKAGES"
+    fi
+    
+    pacman -S --needed $ALL_PACKAGES
     
     # Enable services
     systemctl enable bluetooth

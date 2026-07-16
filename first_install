@@ -39,7 +39,7 @@ install_packages() {
 # Install development tools and other necessary packages
 case $OS in
     "Arch Linux")
-        install_packages base-devel linux-headers os-prober inetutils bluez bluez-utils
+        install_packages --needed base-devel linux-headers os-prober inetutils bluez bluez-utils colord exfat-utils
 
         sudo systemctl enable bluetooth
         ;;
@@ -92,7 +92,8 @@ if [[ $install_drivers =~ ^[Yy]$ ]]; then
         echo "NVIDIA GPU detected. Installing NVIDIA drivers..."
         case $OS in
             "Arch Linux")
-                install_packages nvidia nvidia-utils lib32-nvidia-utils nvidia-settings cuda cudnn lib32-mesa-utils  mesa-utils
+                install_packages --needed nvidia-open nvidia-utils lib32-nvidia-utils nvidia-settings cuda cudnn lib32-mesa-utils  mesa-utils libva-nvidia-driver \
+                python-gobject opencl-nvidia lib32-opencl-nvidia
                 
                 # Add NVIDIA modules to mkinitcpio.conf
                 if ! grep -q "nvidia nvidia_modeset nvidia_uvm nvidia_drm" /etc/mkinitcpio.conf; then

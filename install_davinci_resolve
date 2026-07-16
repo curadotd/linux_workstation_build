@@ -26,7 +26,7 @@ install_arch_davinci() {
     read -p "Do you want to install DaVinci Resolve (free) or DaVinci Resolve Studio? (free/studio): " resolve_version
     if [[ $resolve_version == "studio" ]]; then
         yay -S davinci-resolve-studio log4cxx --needed
-        sudo chown -R mcurado: /opt/resolve/.license
+        sudo chown -R $USER: /opt/resolve/.license
         sudo rm -Rf /opt/resolve/libs/libglib-2.0.so* /opt/resolve/libs/libgio-2.0.so* /opt/resolve/libs/libgmodule-2.0.so*
     else
         yay -S davinci-resolve log4cxx --needed
