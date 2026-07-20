@@ -32,7 +32,7 @@ libzip-devel librsvg2-devel file-devel libjpeg-turbo-devel libwebp-devel \
 pugixml-devel tomlplusplus-devel hwdata-devel libuuid-devel pam-devel \
 xcb-util-devel xcb-util-wm-devel xcb-util-renderutil-devel xcb-util-image-devel xcb-util-keysyms-devel \
 xorg-x11-server-Xwayland qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtwayland-devel polkit-devel \
-glslang-devel libXcursor-devel libeis-devel muparser-devel
+glslang-devel libXcursor-devel libeis-devel muParser-devel
 
 # Package names that vary between Fedora releases; where supported the
 # builds fetch or vendor a missing dependency themselves.
