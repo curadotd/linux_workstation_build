@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Ask user if they want to install Slack
+read -p "Do you want to install Slack? (y/n): " install_choice
+
+if [[ $install_choice =~ ^[Yy]$ ]]; then
+    FILE="slack-*.x86_64.rpm"
+
+    echo "Please download the Slack .rpm from:"
+    echo "https://slack.com/downloads/linux"
+    echo "and save it to your $HOME/Downloads folder."
+    read -p "Press Enter when you have completed this step."
+
+    # Check if the file exists
+    if [ -z "$(ls $HOME/Downloads/$FILE 2>/dev/null)" ]; then
+        echo "File not found in $HOME/Downloads. Exiting."
+        exit 1
+    fi
+
+    ACTUAL_FILE=$(ls -t $HOME/Downloads/$FILE | head -n 1)
+
+    sudo dnf install "$ACTUAL_FILE"
+
+    echo "Slack installation completed."
+else
+    echo "Slack installation skipped."
+fi
