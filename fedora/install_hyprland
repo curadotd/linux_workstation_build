@@ -8,8 +8,15 @@ cd "$(dirname "$0")" || exit 1
 # third-party repos are used - the whole hyprwm stack is built from the
 # official upstream sources instead. Companion tools that ARE in the
 # official Fedora repos are installed with dnf.
+#
+# Hyprland itself is pinned to a release tag (dependencies verified against
+# that tag's CMakeLists) - building the main branch pulls in unreleased
+# requirements. Bump HYPRLAND_VERSION when a new release is out.
 
 set -e
+
+HYPRLAND_VERSION="v0.55.4"
+LUA_VERSION="5.5.0"
 
 # Check if GIT_PATH is already set
 if [ -z "$GIT_PATH" ]; then
@@ -25,6 +32,8 @@ BUILD_DIR="$GIT_PATH/hyprland-build"
 mkdir -p "$BUILD_DIR"
 
 echo "Installing build dependencies from the official Fedora repos..."
+# Verified against Hyprland ${HYPRLAND_VERSION} CMakeLists: glslang, xcursor,
+# re2, muparser (packaged as muParser), lcms2, plus the wayland/gl stack.
 sudo dnf install gcc-c++ cmake ninja-build meson git \
 wayland-devel wayland-protocols-devel libxkbcommon-devel libdrm-devel pixman-devel cairo-devel pango-devel \
 mesa-libEGL-devel mesa-libGLES-devel mesa-libgbm-devel libinput-devel libseat-devel seatd systemd-devel \
@@ -32,11 +41,11 @@ libzip-devel librsvg2-devel file-devel libjpeg-turbo-devel libwebp-devel \
 pugixml-devel tomlplusplus-devel hwdata-devel libuuid-devel pam-devel \
 xcb-util-devel xcb-util-wm-devel xcb-util-renderutil-devel xcb-util-image-devel xcb-util-keysyms-devel \
 xorg-x11-server-Xwayland qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtwayland-devel polkit-devel \
-glslang-devel libXcursor-devel libeis-devel muParser-devel
+glslang-devel libXcursor-devel libeis-devel muParser-devel re2-devel lcms2-devel glib2-devel readline-devel
 
 # Package names that vary between Fedora releases; where supported the
-# builds fetch or vendor a missing dependency themselves.
-for pkg in glaze-devel re2-devel libliftoff-devel libdisplay-info-devel xcb-util-errors-devel sdbus-cpp-devel; do
+# builds fetch or vendor a missing dependency themselves (e.g. glaze, udis86).
+for pkg in glaze-devel libliftoff-devel libdisplay-info-devel xcb-util-errors-devel sdbus-cpp-devel; do
     sudo dnf install "$pkg" || echo "WARNING: $pkg not found, the build will fetch/vendor it if supported."
 done
 
@@ -44,15 +53,52 @@ echo "Installing desktop tools from the official Fedora repos..."
 sudo dnf install waybar dunst qt5ct qt6ct qt5-qtwayland pavucontrol wl-clipboard cliphist \
 grim slurp sddm rofi blueman pamixer playerctl jq kitty dolphin mate-polkit
 
+# Hyprland ${HYPRLAND_VERSION} requires Lua >=5.5 <5.6; Fedora 44 ships 5.4,
+# so build 5.5 from the official lua.org source.
+export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+if ! pkg-config --exists "lua5.5" && ! pkg-config --atleast-version=5.5 lua 2>/dev/null; then
+    echo ""
+    echo "=== Building Lua $LUA_VERSION from lua.org ==="
+    cd "$BUILD_DIR"
+    if [ ! -d "lua-$LUA_VERSION" ]; then
+        curl -LO "https://www.lua.org/ftp/lua-$LUA_VERSION.tar.gz"
+        tar xzf "lua-$LUA_VERSION.tar.gz"
+    fi
+    cd "lua-$LUA_VERSION"
+    make linux-readline || make linux
+    sudo make install INSTALL_TOP=/usr/local
+    # lua.org's Makefile does not install a pkg-config file, create one
+    sudo mkdir -p /usr/local/lib/pkgconfig
+    sudo tee /usr/local/lib/pkgconfig/lua5.5.pc > /dev/null << EOF
+prefix=/usr/local
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: Lua
+Description: Lua language engine
+Version: $LUA_VERSION
+Libs: -L\${libdir} -llua -lm -ldl
+Cflags: -I\${includedir}
+EOF
+else
+    echo "Lua >= 5.5 already available, skipping source build."
+fi
+
 build_cmake_repo() {
     local url=$1
+    local ref=$2
     local name=$(basename "$url")
     echo ""
-    echo "=== Building $name ==="
+    echo "=== Building $name ${ref:+($ref)} ==="
     if [ ! -d "$BUILD_DIR/$name" ]; then
         git clone --recursive "$url" "$BUILD_DIR/$name"
     fi
     cd "$BUILD_DIR/$name"
+    if [ -n "$ref" ]; then
+        git fetch --tags
+        git checkout "$ref"
+        git submodule update --init --recursive
+    fi
     cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
     cmake --build build -j$(nproc)
     sudo cmake --install build
@@ -65,8 +111,9 @@ build_cmake_repo https://github.com/hyprwm/hyprlang
 build_cmake_repo https://github.com/hyprwm/hyprcursor
 build_cmake_repo https://github.com/hyprwm/hyprgraphics
 build_cmake_repo https://github.com/hyprwm/hyprland-protocols
+build_cmake_repo https://github.com/hyprwm/hyprwire
 build_cmake_repo https://github.com/hyprwm/aquamarine
-build_cmake_repo https://github.com/hyprwm/Hyprland
+build_cmake_repo https://github.com/hyprwm/Hyprland "$HYPRLAND_VERSION"
 build_cmake_repo https://github.com/hyprwm/hyprpaper
 build_cmake_repo https://github.com/hyprwm/hyprlock
 build_cmake_repo https://github.com/hyprwm/hypridle
@@ -86,7 +133,7 @@ sudo install -m 755 "$BUILD_DIR/Hyprshot/hyprshot" /usr/local/bin/hyprshot
 
 echo ""
 echo "Hyprland stack built and installed from source (sources kept in $BUILD_DIR)."
-echo "To update later: git pull in each directory and re-run this script."
+echo "To update later: bump HYPRLAND_VERSION in this script, git pull the tool repos, and re-run."
 echo "Note: hyprshutdown (used by the power menu on Arch) is AUR-only, the dotconfig"
 echo "scripts fall back to the rofi power menu when it is missing."
 echo "Optional: run ./install_hyprland_plugins for the official Hyprglass and Hyprspace plugins."

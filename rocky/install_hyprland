@@ -16,6 +16,9 @@ cd "$(dirname "$0")" || exit 1
 
 set -e
 
+HYPRLAND_VERSION="v0.55.4"
+LUA_VERSION="5.5.0"
+
 # Check if GIT_PATH is already set
 if [ -z "$GIT_PATH" ]; then
     read -p "Enter the path for git repositories (default: $HOME/git): " git_path
@@ -43,7 +46,7 @@ mesa-libEGL-devel mesa-libgbm-devel libinput-devel systemd-devel \
 libzip-devel librsvg2-devel file-devel libjpeg-turbo-devel libwebp-devel \
 libuuid-devel pam-devel \
 xcb-util-devel xcb-util-wm-devel xcb-util-renderutil-devel xcb-util-image-devel xcb-util-keysyms-devel \
-xorg-x11-server-Xwayland polkit-devel libXcursor-devel
+xorg-x11-server-Xwayland polkit-devel libXcursor-devel lcms2-devel glib2-devel readline-devel
 
 # Names that may only exist in EPEL or not at all on EL9; where supported
 # the builds fetch or vendor a missing dependency themselves.
@@ -53,6 +56,37 @@ glslang-devel libeis-devel muParser-devel qt6-qtbase-devel qt6-qtdeclarative-dev
     sudo dnf install "$pkg" || echo "WARNING: $pkg not found, the build will fetch/vendor it if supported."
 done
 
+# Hyprland ${HYPRLAND_VERSION} requires Lua >=5.5 <5.6; EL9 ships 5.4,
+# so build 5.5 from the official lua.org source.
+export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+if ! pkg-config --exists "lua5.5" && ! pkg-config --atleast-version=5.5 lua 2>/dev/null; then
+    echo ""
+    echo "=== Building Lua $LUA_VERSION from lua.org ==="
+    cd "$BUILD_DIR"
+    if [ ! -d "lua-$LUA_VERSION" ]; then
+        curl -LO "https://www.lua.org/ftp/lua-$LUA_VERSION.tar.gz"
+        tar xzf "lua-$LUA_VERSION.tar.gz"
+    fi
+    cd "lua-$LUA_VERSION"
+    make linux-readline || make linux
+    sudo make install INSTALL_TOP=/usr/local
+    # lua.org's Makefile does not install a pkg-config file, create one
+    sudo mkdir -p /usr/local/lib/pkgconfig
+    sudo tee /usr/local/lib/pkgconfig/lua5.5.pc > /dev/null << EOF
+prefix=/usr/local
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: Lua
+Description: Lua language engine
+Version: $LUA_VERSION
+Libs: -L\${libdir} -llua -lm -ldl
+Cflags: -I\${includedir}
+EOF
+else
+    echo "Lua >= 5.5 already available, skipping source build."
+fi
+
 echo "Installing desktop tools from the official repos and EPEL..."
 for pkg in waybar dunst qt5ct qt6ct pavucontrol wl-clipboard cliphist grim slurp sddm rofi blueman \
 pamixer playerctl jq kitty dolphin mate-polkit; do
@@ -61,13 +95,19 @@ done
 
 build_cmake_repo() {
     local url=$1
+    local ref=$2
     local name=$(basename "$url")
     echo ""
-    echo "=== Building $name ==="
+    echo "=== Building $name ${ref:+($ref)} ==="
     if [ ! -d "$BUILD_DIR/$name" ]; then
         git clone --recursive "$url" "$BUILD_DIR/$name"
     fi
     cd "$BUILD_DIR/$name"
+    if [ -n "$ref" ]; then
+        git fetch --tags
+        git checkout "$ref"
+        git submodule update --init --recursive
+    fi
     cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
     cmake --build build -j$(nproc)
     sudo cmake --install build
@@ -80,8 +120,9 @@ build_cmake_repo https://github.com/hyprwm/hyprlang
 build_cmake_repo https://github.com/hyprwm/hyprcursor
 build_cmake_repo https://github.com/hyprwm/hyprgraphics
 build_cmake_repo https://github.com/hyprwm/hyprland-protocols
+build_cmake_repo https://github.com/hyprwm/hyprwire
 build_cmake_repo https://github.com/hyprwm/aquamarine
-build_cmake_repo https://github.com/hyprwm/Hyprland
+build_cmake_repo https://github.com/hyprwm/Hyprland "$HYPRLAND_VERSION"
 build_cmake_repo https://github.com/hyprwm/hyprpaper
 build_cmake_repo https://github.com/hyprwm/hyprlock
 build_cmake_repo https://github.com/hyprwm/hypridle
