@@ -46,7 +46,7 @@ mesa-libEGL-devel mesa-libgbm-devel libinput-devel systemd-devel \
 libzip-devel librsvg2-devel file-devel libjpeg-turbo-devel libwebp-devel \
 libuuid-devel pam-devel \
 xcb-util-devel xcb-util-wm-devel xcb-util-renderutil-devel xcb-util-image-devel xcb-util-keysyms-devel \
-xorg-x11-server-Xwayland polkit-devel libXcursor-devel lcms2-devel glib2-devel readline-devel
+xorg-x11-server-Xwayland polkit-devel libXcursor-devel lcms2-devel glib2-devel readline-devel iniparser-devel
 
 # Names that may only exist in EPEL or not at all on EL9; where supported
 # the builds fetch or vendor a missing dependency themselves.
@@ -154,6 +154,8 @@ build_meson_repo https://github.com/hyprwm/hyprland-protocols v0.7.0
 build_cmake_repo https://github.com/hyprwm/hyprwire v0.3.1
 build_cmake_repo https://github.com/hyprwm/aquamarine v0.13.0
 build_cmake_repo https://github.com/hyprwm/Hyprland "$HYPRLAND_VERSION"
+# hyprtoolkit is a required library for the newer hypr tools (hyprpaper 0.8+, hyprlock 0.9+)
+build_cmake_repo https://github.com/hyprwm/hyprtoolkit v0.5.4
 build_cmake_repo https://github.com/hyprwm/hyprpaper v0.8.4
 build_cmake_repo https://github.com/hyprwm/hyprlock v0.9.6
 build_cmake_repo https://github.com/hyprwm/hypridle v0.1.7
@@ -162,7 +164,6 @@ build_cmake_repo https://github.com/hyprwm/xdg-desktop-portal-hyprland v1.4.0
 
 # Optional extras - failures here should not abort the whole install
 build_cmake_repo https://github.com/hyprwm/hyprpolkitagent v0.1.3 || echo "WARNING: hyprpolkitagent build failed, mate-polkit (installed above) can be used as the polkit agent."
-build_cmake_repo https://github.com/hyprwm/hyprtoolkit v0.5.4 || echo "WARNING: hyprtoolkit build failed, hyprlauncher will not build without it."
 build_cmake_repo https://github.com/hyprwm/hyprlauncher v0.1.6 || echo "WARNING: hyprlauncher build failed, rofi (installed above) is the launcher fallback."
 
 # hyprshot is a script, installed from its upstream repository
