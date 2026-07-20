@@ -1,15 +1,106 @@
 #!/bin/bash
 
-echo "Installing Hyprland and SDDM on Rocky Linux..."
-# The copr plugin is part of dnf-plugins-core, pamixer/playerctl come from EPEL
-sudo dnf install dnf-plugins-core epel-release
-sudo dnf copr enable solopasha/hyprland
-sudo dnf install hyprland sddm waybar
+# Always run from the directory this script lives in,
+# so sibling scripts are found no matter where it is called from
+cd "$(dirname "$0")" || exit 1
 
-# Ecosystem tools from the same COPR / EPEL; install what is available.
-for pkg in hyprpaper hyprlock hypridle hyprshot cliphist pamixer playerctl jq kitty rofi \
-wl-clipboard dunst pavucontrol grim slurp; do
+# Hyprland is not in the official Rocky/EPEL repositories, and per policy no
+# third-party repos are used - the whole hyprwm stack is built from the
+# official upstream sources instead. Build deps come from the official
+# repos plus EPEL and CRB.
+#
+# NOTE: Enterprise Linux 9 ships an older toolchain. gcc-toolset-14 provides
+# a modern compiler, but if the newest Hyprland tag still refuses to build
+# (cmake or wayland too old), check out an older release tag in
+# $BUILD_DIR/Hyprland and re-run.
+
+set -e
+
+# Check if GIT_PATH is already set
+if [ -z "$GIT_PATH" ]; then
+    read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+    GIT_PATH=${git_path:-$HOME/git}
+    export GIT_PATH
+    mkdir -p "$GIT_PATH"
+else
+    echo "GIT_PATH is already set to $GIT_PATH"
+fi
+
+BUILD_DIR="$GIT_PATH/hyprland-build"
+mkdir -p "$BUILD_DIR"
+
+echo "Enabling EPEL and CRB, installing build dependencies..."
+sudo dnf install epel-release
+sudo dnf config-manager --set-enabled crb
+
+# Modern compiler for the C++26-era Hyprland codebase
+sudo dnf install gcc-toolset-14
+source /opt/rh/gcc-toolset-14/enable
+
+sudo dnf install cmake ninja-build meson git \
+wayland-devel wayland-protocols-devel libxkbcommon-devel libdrm-devel pixman-devel cairo-devel pango-devel \
+mesa-libEGL-devel mesa-libgbm-devel libinput-devel systemd-devel \
+libzip-devel librsvg2-devel file-devel libjpeg-turbo-devel libwebp-devel \
+libuuid-devel pam-devel \
+xcb-util-devel xcb-util-wm-devel xcb-util-renderutil-devel xcb-util-image-devel xcb-util-keysyms-devel \
+xorg-x11-server-Xwayland polkit-devel
+
+# Names that may only exist in EPEL or not at all on EL9; where supported
+# the builds fetch or vendor a missing dependency themselves.
+for pkg in libseat-devel seatd pugixml-devel tomlplusplus-devel hwdata-devel mesa-libGLES-devel \
+glaze-devel re2-devel libliftoff-devel libdisplay-info-devel xcb-util-errors-devel sdbus-cpp-devel \
+qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtwayland-devel; do
+    sudo dnf install "$pkg" || echo "WARNING: $pkg not found, the build will fetch/vendor it if supported."
+done
+
+echo "Installing desktop tools from the official repos and EPEL..."
+for pkg in waybar dunst qt5ct qt6ct pavucontrol wl-clipboard cliphist grim slurp sddm rofi blueman \
+pamixer playerctl jq kitty dolphin mate-polkit; do
     sudo dnf install "$pkg" || echo "WARNING: $pkg is not available, install it manually if needed."
 done
 
-echo "Hyprland and SDDM installation completed."
+build_cmake_repo() {
+    local url=$1
+    local name=$(basename "$url")
+    echo ""
+    echo "=== Building $name ==="
+    if [ ! -d "$BUILD_DIR/$name" ]; then
+        git clone --recursive "$url" "$BUILD_DIR/$name"
+    fi
+    cd "$BUILD_DIR/$name"
+    cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+    cmake --build build -j$(nproc)
+    sudo cmake --install build
+}
+
+# Official hyprwm stack, in dependency order
+build_cmake_repo https://github.com/hyprwm/hyprwayland-scanner
+build_cmake_repo https://github.com/hyprwm/hyprutils
+build_cmake_repo https://github.com/hyprwm/hyprlang
+build_cmake_repo https://github.com/hyprwm/hyprcursor
+build_cmake_repo https://github.com/hyprwm/hyprgraphics
+build_cmake_repo https://github.com/hyprwm/hyprland-protocols
+build_cmake_repo https://github.com/hyprwm/aquamarine
+build_cmake_repo https://github.com/hyprwm/Hyprland
+build_cmake_repo https://github.com/hyprwm/hyprpaper
+build_cmake_repo https://github.com/hyprwm/hyprlock
+build_cmake_repo https://github.com/hyprwm/hypridle
+build_cmake_repo https://github.com/hyprwm/hyprpicker
+build_cmake_repo https://github.com/hyprwm/xdg-desktop-portal-hyprland
+
+# Optional extras - failures here should not abort the whole install
+build_cmake_repo https://github.com/hyprwm/hyprpolkitagent || echo "WARNING: hyprpolkitagent build failed, mate-polkit (installed above) can be used as the polkit agent."
+build_cmake_repo https://github.com/hyprwm/hyprtoolkit || echo "WARNING: hyprtoolkit build failed, hyprlauncher will not build without it."
+build_cmake_repo https://github.com/hyprwm/hyprlauncher || echo "WARNING: hyprlauncher build failed, rofi (installed above) is the launcher fallback."
+
+# hyprshot is a script, installed from its upstream repository
+if [ ! -d "$BUILD_DIR/Hyprshot" ]; then
+    git clone https://github.com/Gustash/Hyprshot "$BUILD_DIR/Hyprshot"
+fi
+sudo install -m 755 "$BUILD_DIR/Hyprshot/hyprshot" /usr/local/bin/hyprshot
+
+echo ""
+echo "Hyprland stack built and installed from source (sources kept in $BUILD_DIR)."
+echo "To update later: git pull in each directory and re-run this script."
+echo "Optional: run ./install_hyprland_plugins for the official Hyprglass and Hyprspace plugins."
+echo "Hyprland installation completed."

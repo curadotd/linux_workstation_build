@@ -14,7 +14,8 @@ if [[ ! $install_plugins =~ ^[Yy]$ ]]; then
 fi
 
 # Build dependencies for hyprpm
-sudo dnf install cmake meson cpio git gcc-c++ pkgconf-pkg-config hyprland-devel
+# Hyprland headers are already installed by the source build (install_hyprland)
+sudo dnf install cmake meson cpio git gcc-c++ pkgconf-pkg-config
 
 hyprpm update
 hyprpm add https://github.com/hyprnux/hyprglass || true
