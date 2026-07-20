@@ -16,6 +16,25 @@ if [[ $install_choice =~ ^[Yy]$ ]]; then
     sudo dnf install alsa-lib libX11 libXcursor libXi libSM mesa-libGL libjpeg-turbo libpng libcurl \
     binutils tar zstd
 
+    # Parsec dlopens libjpeg.so.8 (Ubuntu ABI) at runtime; Fedora/EL only ship
+    # libjpeg.so.62. Build the jpeg8 ABI from the official libjpeg-turbo
+    # upstream (only the jpeg target - turbojpeg is not needed) and install it
+    # alongside the system library.
+    if ! ldconfig -p | grep -q "libjpeg\.so\.8 "; then
+        echo "Building libjpeg (jpeg8 ABI) from the official libjpeg-turbo source..."
+        sudo dnf install cmake nasm gcc git
+        tmp_jpeg=$(mktemp -d)
+        git clone --branch 3.2.0 --depth 1 https://github.com/libjpeg-turbo/libjpeg-turbo.git "$tmp_jpeg"
+        cd "$tmp_jpeg" || exit 1
+        cmake -B build -DCMAKE_BUILD_TYPE=Release -DWITH_JPEG8=1
+        cmake --build build --target jpeg -j$(nproc)
+        sudo install -m 755 build/libjpeg.so.8.* /usr/lib64/
+        sudo ln -sf "$(basename build/libjpeg.so.8.*)" /usr/lib64/libjpeg.so.8
+        sudo ldconfig
+        cd /
+        rm -rf "$tmp_jpeg"
+    fi
+
     echo "Downloading Parsec from the official vendor CDN..."
     tmp_dir=$(mktemp -d)
     cd "$tmp_dir" || exit 1
