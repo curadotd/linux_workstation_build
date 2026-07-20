@@ -10,7 +10,7 @@ fi
 
 # Install development tools and other necessary packages
 sudo apt update
-sudo apt install build-essential dkms linux-headers-amd64 libgl1-mesa-dev pkg-config meson ninja-build
+sudo apt install build-essential dkms linux-headers-amd64 libgl1-mesa-dev pkg-config meson ninja-build pciutils
 
 # Ask if the user wants to use unstable/testing repositories
 read -p "Do you want to use unstable/testing repositories? This is not recommended for production systems. (y/n): " unstable_choice

@@ -16,7 +16,7 @@ if ! grep -q "^\[multilib\]" /etc/pacman.conf; then
 fi
 
 # Install development tools and other necessary packages
-sudo pacman -Syu --needed base-devel linux-headers os-prober inetutils bluez bluez-utils colord exfatprogs
+sudo pacman -Syu --needed base-devel linux-headers os-prober inetutils bluez bluez-utils colord exfatprogs pciutils
 
 sudo systemctl enable bluetooth
 

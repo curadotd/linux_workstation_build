@@ -12,7 +12,7 @@ fi
 # Install development tools and other necessary packages
 sudo dnf group install development-tools
 sudo dnf install gcc gcc-c++ kernel-devel kernel-headers tar tree \
-unzip cmake make jq dnf-plugins-core
+unzip cmake make jq dnf-plugins-core pciutils
 
 # Enable RPM Fusion free and nonfree, needed for NVIDIA drivers, Steam, full ffmpeg, etc.
 if ! rpm -q rpmfusion-free-release > /dev/null 2>&1; then
@@ -53,7 +53,7 @@ if [[ $install_drivers =~ ^[Yy]$ ]]; then
 
         if [[ "$nvidia_source" == "1" ]]; then
             echo "Installing NVIDIA drivers from RPM Fusion..."
-            sudo dnf install akmod-nvidia xorg-x11-drv-nvidia-cuda xorg-x11-drv-nvidia-cuda-libs nvidia-vaapi-driver nvidia-settings
+            sudo dnf install akmod-nvidia xorg-x11-drv-nvidia-cuda xorg-x11-drv-nvidia-cuda-libs libva-nvidia-driver nvidia-settings
 
             echo "Building the NVIDIA kernel module (this can take a few minutes)..."
             sudo akmods --force

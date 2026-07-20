@@ -12,7 +12,7 @@ fi
 sudo dnf groupinstall "Development Tools"
 sudo dnf install epel-release
 sudo dnf install gcc gcc-c++ kernel-devel kernel-headers glibc-devel.i686 libgcc.i686 tar tree \
-unzip cmake make jq
+unzip cmake make jq pciutils
 
 # Ask if the user wants to enable the CRB (CodeReady Builder) repository,
 # it is needed for many development packages.
