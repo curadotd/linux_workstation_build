@@ -50,6 +50,20 @@ if [[ $use_dotconfig =~ ^[Yy]$ ]]; then
     cp -R qt5ct $HOME/.config/
     cp -R picom $HOME/.config/
 
+    # Point Hyprland at this machine's boot GPU. Card numbers vary between
+    # machines, driver setups and even reinstalls, so the value in the repo
+    # is only a default - detect the real one at deploy time.
+    boot_card=""
+    for c in /sys/class/drm/card*/device/boot_vga; do
+        if [ "$(cat $c 2>/dev/null)" = "1" ]; then
+            boot_card=$(basename $(dirname $(dirname $c)))
+        fi
+    done
+    if [ -n "$boot_card" ] && [ -f "$HOME/.config/hypr/imports/monitors.conf" ]; then
+        sed -i "s|^env = AQ_DRM_DEVICES,.*|env = AQ_DRM_DEVICES,/dev/dri/$boot_card|" "$HOME/.config/hypr/imports/monitors.conf"
+        echo "Set Hyprland AQ_DRM_DEVICES to /dev/dri/$boot_card (this machine's boot GPU)."
+    fi
+
     echo "Dotconfig setup complete."
     cd $current_dir
 else
