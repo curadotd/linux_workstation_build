@@ -43,13 +43,13 @@ mesa-libEGL-devel mesa-libgbm-devel libinput-devel systemd-devel \
 libzip-devel librsvg2-devel file-devel libjpeg-turbo-devel libwebp-devel \
 libuuid-devel pam-devel \
 xcb-util-devel xcb-util-wm-devel xcb-util-renderutil-devel xcb-util-image-devel xcb-util-keysyms-devel \
-xorg-x11-server-Xwayland polkit-devel
+xorg-x11-server-Xwayland polkit-devel libXcursor-devel
 
 # Names that may only exist in EPEL or not at all on EL9; where supported
 # the builds fetch or vendor a missing dependency themselves.
 for pkg in libseat-devel seatd pugixml-devel tomlplusplus-devel hwdata-devel mesa-libGLES-devel \
 glaze-devel re2-devel libliftoff-devel libdisplay-info-devel xcb-util-errors-devel sdbus-cpp-devel \
-glslang-devel qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtwayland-devel; do
+glslang-devel libeis-devel muparser-devel qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtwayland-devel; do
     sudo dnf install "$pkg" || echo "WARNING: $pkg not found, the build will fetch/vendor it if supported."
 done
 
