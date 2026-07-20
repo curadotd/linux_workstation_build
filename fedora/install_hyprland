@@ -1,10 +1,20 @@
 #!/bin/bash
 
-# Hyprland and most of its ecosystem are packaged in the official Fedora repositories.
+# Hyprland on Fedora comes from the solopasha/hyprland COPR
+# (the install method recommended by the Hyprland wiki for Fedora).
+# It also carries the hypr* ecosystem tools and nwg-look.
 
 echo "Installing Hyprland and SDDM on Fedora..."
-sudo dnf install hyprland hyprlock hypridle hyprpicker hyprpaper xdg-desktop-portal-hyprland \
-waybar dunst qt5ct qt6ct qt5-qtwayland qt6-qtwayland pavucontrol wl-clipboard cliphist \
-grim slurp sddm rofi-wayland blueman pamixer playerctl jq kitty dolphin nwg-look
+sudo dnf install dnf5-plugins 2>/dev/null || sudo dnf install dnf-plugins-core
+sudo dnf copr enable solopasha/hyprland
 
+sudo dnf install hyprland hyprpaper hyprlock hypridle hyprpicker hyprshot \
+xdg-desktop-portal-hyprland hyprpolkitagent hyprlauncher hyprtoolkit hyprsysteminfo nwg-look \
+waybar dunst qt5ct qt6ct qt5-qtwayland qt6-qtwayland pavucontrol wl-clipboard cliphist \
+grim slurp sddm rofi blueman pamixer playerctl jq kitty dolphin
+
+echo ""
+echo "Note: hyprshutdown (used by the power menu on Arch) is AUR-only, the dotconfig"
+echo "scripts fall back to the rofi power menu when it is missing."
+echo "Optional: run ./install_hyprland_plugins for the official Hyprglass and Hyprspace plugins."
 echo "Hyprland and SDDM installation completed."

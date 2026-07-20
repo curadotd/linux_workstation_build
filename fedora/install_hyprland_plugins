@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Install official Hyprland plugins from https://hypr.land/plugins/ using hyprpm:
+#   Hyprglass - liquid glass visual effects     (https://github.com/hyprnux/hyprglass)
+#   Hyprspace - macOS-like workspace overview   (https://github.com/KZDKM/Hyprspace)
+#
+# Run this from inside a Hyprland session. hyprpm builds plugins against the
+# installed Hyprland version, so re-run 'hyprpm update' after Hyprland updates.
+
+read -p "Do you want to install the Hyprglass and Hyprspace plugins? (y/n) " install_plugins
+if [[ ! $install_plugins =~ ^[Yy]$ ]]; then
+    echo "Skipping Hyprland plugins."
+    exit 0
+fi
+
+# Build dependencies for hyprpm
+sudo dnf install cmake meson cpio git gcc-c++ pkgconf-pkg-config hyprland-devel
+
+hyprpm update
+hyprpm add https://github.com/hyprnux/hyprglass || true
+hyprpm add https://github.com/KZDKM/Hyprspace || true
+hyprpm enable hyprglass
+hyprpm enable Hyprspace
+hyprpm reload
+
+echo "Plugins installed and enabled."
+echo "To load them at startup, hyprland.conf runs 'exec-once = hyprpm reload -n'."
+echo "For the Hyprspace overview, uncomment the SUPER+TAB bind in hypr/imports/keybindings.conf."
