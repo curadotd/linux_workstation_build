@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Always run from the directory this script lives in,
+# so sibling scripts are found no matter where it is called from
+cd "$(dirname "$0")" || exit 1
+
 # Install Steam plus Gamescope, and optionally set up a Steam Big Picture session.
 
 # Ask user if they want to install Steam
