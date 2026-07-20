@@ -52,7 +52,8 @@ xorg-x11-server-Xwayland polkit-devel libXcursor-devel lcms2-devel glib2-devel r
 # the builds fetch or vendor a missing dependency themselves.
 for pkg in libseat-devel seatd pugixml-devel tomlplusplus-devel hwdata-devel mesa-libGLES-devel \
 glaze-devel re2-devel libliftoff-devel libdisplay-info-devel xcb-util-errors-devel sdbus-cpp-devel \
-glslang-devel libeis-devel muParser-devel pipewire-devel qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtwayland-devel; do
+glslang-devel libeis-devel muParser-devel pipewire-devel polkit-qt6-1-devel libqalculate-devel \
+qt6-qtbase-devel qt6-qtdeclarative-devel qt6-qtwayland-devel; do
     sudo dnf install "$pkg" || echo "WARNING: $pkg not found, the build will fetch/vendor it if supported."
 done
 
