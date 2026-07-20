@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Parsec only publishes an official .deb (their own CDN, Ubuntu-targeted).
+# There is no RPM, so the .deb contents are extracted and installed directly:
+#   /usr/bin/parsecd
+#   /usr/share/applications/parsecd.desktop
+#   /usr/share/icons/hicolor/256x256/apps/parsecd.png
+#   /usr/share/parsec/skel/*
+# To uninstall, remove those paths.
+
+# Ask user if they want to install Parsec
+read -p "Do you want to install Parsec? (y/n): " install_choice
+
+if [[ $install_choice =~ ^[Yy]$ ]]; then
+    # Runtime libraries from the official repos (most are present on a desktop install)
+    sudo dnf install alsa-lib libX11 libXcursor libXi libSM mesa-libGL libjpeg-turbo libpng libcurl \
+    binutils tar zstd
+
+    echo "Downloading Parsec from the official vendor CDN..."
+    tmp_dir=$(mktemp -d)
+    cd "$tmp_dir" || exit 1
+    curl -sO https://builds.parsec.app/package/parsec-linux.deb
+    ar x parsec-linux.deb
+    tar xf data.tar.*
+
+    sudo cp -r usr/* /usr/
+
+    cd /
+    rm -rf "$tmp_dir"
+
+    # Sanity check
+    if command -v parsecd > /dev/null && ! ldd /usr/bin/parsecd | grep -q "not found"; then
+        echo "Parsec installation completed. Launch with: parsecd"
+    else
+        echo "WARNING: parsecd installed but some libraries did not resolve, run: ldd /usr/bin/parsecd"
+    fi
+else
+    echo "Parsec installation skipped."
+fi

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Ask user if they want to install Parsec
+read -p "Do you want to install Parsec? (y/n): " install_choice
+
+if [[ $install_choice =~ ^[Yy]$ ]]; then
+    echo "Downloading Parsec from the official vendor CDN..."
+    current_dir=$(pwd)
+    cd ~/Downloads
+    curl -sO https://builds.parsec.app/package/parsec-linux.deb
+    sudo apt install ./parsec-linux.deb
+    rm parsec-linux.deb
+    cd "$current_dir"
+    echo "Parsec installation completed."
+else
+    echo "Parsec installation skipped."
+fi
