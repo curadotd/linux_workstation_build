@@ -59,7 +59,11 @@ if [[ $install_drivers =~ ^[Yy]$ ]]; then
             sudo akmods --force
         fi
 
-        echo "The initramfs and module options are handled automatically."
+        # Enable kernel modesetting and the framebuffer console on the NVIDIA GPU.
+        # Without this, Wayland compositors (and the text console) can end up
+        # with no display output at all.
+        sudo grubby --update-kernel=ALL --args="nvidia-drm.modeset=1 nvidia-drm.fbdev=1"
+
         echo "Wait for the module build to finish before rebooting, check with: modinfo -F version nvidia"
     elif lspci | grep -i amd > /dev/null; then
         echo "AMD GPU detected. Installing AMD drivers..."
