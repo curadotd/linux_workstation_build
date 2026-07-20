@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Ask user if they want to install Steam
+read -p "Do you want to install Steam? (y/n): " steam_answer
+if [[ $steam_answer == [Yy]* ]]; then
+    echo "Installing Steam..."
+
+    sudo pacman -S --needed steam wine giflib lib32-giflib libpng lib32-libpng libldap lib32-libldap gnutls lib32-gnutls \
+    mpg123 lib32-mpg123 openal lib32-openal v4l-utils lib32-v4l-utils libpulse lib32-libpulse libgpg-error \
+    lib32-libgpg-error alsa-plugins lib32-alsa-plugins alsa-lib lib32-alsa-lib libjpeg-turbo lib32-libjpeg-turbo \
+    sqlite lib32-sqlite libxcomposite lib32-libxcomposite libxinerama lib32-libgcrypt libgcrypt lib32-libxinerama \
+    ncurses lib32-ncurses ocl-icd lib32-ocl-icd libxslt lib32-libxslt libva lib32-libva gtk3 gamemode lib32-gamemode \
+    lib32-gtk3 gst-plugins-base-libs lib32-gst-plugins-base-libs vulkan-icd-loader lib32-vulkan-icd-loader mangohud \
+    lutris
+
+    ./install_yay
+
+    yay -S --needed xpadneo-dkms proton-ge-custom-bin
+
+    sudo usermod -aG gamemode $USER
+    # Create /etc/profile.d/gaming.sh if it doesn't exist
+    if [ ! -f /etc/profile.d/gaming.sh ]; then
+        echo "Creating /etc/profile.d/gaming.sh and setting MANGOHUD=1"
+        sudo bash -c 'echo "export MANGOHUD=1" > /etc/profile.d/gaming.sh'
+        sudo chmod 644 /etc/profile.d/gaming.sh
+    else
+        echo "/etc/profile.d/gaming.sh already exists. Skipping creation."
+    fi
+
+    echo "Steam installation completed."
+else
+    echo "Steam installation skipped."
+fi

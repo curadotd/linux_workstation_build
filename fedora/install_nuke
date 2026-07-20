@@ -1,0 +1,158 @@
+#!/bin/bash
+
+# Foundry Nuke Installation Script for Fedora
+
+echo "Installing Dependencies..."
+sudo dnf install mesa-libGLU libxcb libxkbcommon-x11 xcb-util-wm xcb-util-renderutil xcb-util-keysyms libxcrypt-compat
+
+# Main script
+echo "Foundry Nuke Installation Script"
+echo "================================"
+
+# Ask user to download Nuke
+echo "Please download the Foundry Nuke installer from https://www.foundry.com/products/nuke/download to your ~/Downloads folder."
+read -p "Press Enter when you have downloaded the installer."
+
+# Find the Nuke installer
+installer=$(find ~/Downloads -name "Nuke*-linux-*.tgz" -type f -print -quit)
+
+if [ -z "$installer" ]; then
+    echo "Nuke installer not found in ~/Downloads. Please download it and try again."
+    exit 1
+fi
+
+# Extract the installer
+echo "Extracting Nuke installer..."
+tar -xzf "$installer" -C ~/Downloads
+
+# Find the extracted installer
+install_file=$(find ~/Downloads -name "Nuke*-linux-*.run" -type f -print -quit)
+
+if [ -z "$install_file" ]; then
+    echo "Extracted Nuke installer not found. Installation failed."
+    exit 1
+fi
+
+# Run the installer
+echo "Installing Nuke..."
+read -p "Enter the path where Nuke should be installed (e.g., /opt/foundry/nuke): " nuke_path
+
+# Check if the installation path requires sudo
+if [[ "$nuke_path" == /opt/* || "$nuke_path" == /usr/* ]]; then
+    echo "The specified path may require sudo permissions."
+    echo "Running Nuke installer with sudo..."
+    sudo $install_file --accept-foundry-eula --prefix=$nuke_path
+else
+    echo "Running Nuke installer..."
+    $install_file --accept-foundry-eula --prefix=$nuke_path
+fi
+
+# Check if installation was successful
+if [ $? -eq 0 ]; then
+    echo "Nuke installation completed successfully."
+else
+    echo "Nuke installation failed. Please check the error messages above."
+    exit 1
+fi
+
+# Extract Nuke version from the installer filename
+nuke_version=$(echo "$installer" | grep -oP 'Nuke\K[0-9.v]+' | head -1)
+
+# Extract major version (e.g., 15.1 from 15.1v2)
+nuke_major_version=$(echo "$nuke_version" | grep -oP '^[0-9]+\.[0-9]+')
+
+# Ask user if they want to create a launch script
+read -p "Do you want to create a launch script? (y/n): " launch_answer
+if [[ $launch_answer == [Yy]* ]]; then
+
+    read -p "Enter the path where you want the launcher to be installed (e.g., /usr/local/bin): " launch_nuke_path
+    read -p "Are you running Nuke Non-Commercial? (y/n): " nuke_non_commercial
+    if [[ "$launch_nuke_path" == /opt/* || "$launch_nuke_path" == /usr/* ]]; then
+        sudoer="sudo"
+    else
+        sudoer=""
+    fi
+
+    if [[ $nuke_non_commercial == [Yy]* ]]; then
+        nc="--nc"
+    else
+        nc=""
+    fi
+
+    $sudoer tee -a $launch_nuke_path/nuke_launcher >/dev/null << EOF
+#!/bin/bash
+if [ "\$1" == "-h" ] || [ "\$1" == "--help" ]; then
+    echo "Usage:"
+    echo "  ./nuke_launcher        # Launch regular Nuke"
+    echo "  ./nuke_launcher x      # Launch NukeX"
+    echo "  ./nuke_launcher studio # Launch Nuke Studio"
+    exit 0
+fi
+
+if [ "\$1" == "x" ]; then
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --nukex $nc
+elif [ "\$1" == "studio" ]; then
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} --studio $nc
+else
+    $nuke_path/Nuke${nuke_version}/Nuke${nuke_major_version} $nc
+fi
+EOF
+
+    $sudoer chmod +x $launch_nuke_path/nuke_launcher
+
+    echo "Launch script created. Usage:"
+    echo "  ./nuke_launcher        # Launch regular Nuke"
+    echo "  ./nuke_launcher x      # Launch NukeX"
+    echo "  ./nuke_launcher studio # Launch Nuke Studio"
+else
+    echo "Launch script not created."
+fi
+
+# Add to PATH
+read -p "Do you want to add the Nuke launcher to your PATH, in the .bashrc? (y/n): " add_to_path
+if [ "$add_to_path" == "y" ]; then
+    echo "export PATH=\$PATH:$launch_nuke_path" >> ~/.bashrc
+    echo "Nuke launcher added to PATH. Please restart your terminal or run 'source ~/.bashrc'."
+else
+    echo "Add $launch_nuke_path/nuke_launcher to your 'PATH' environment variables manually if needed."
+fi
+
+# Create application launcher
+read -p "Do you want to create application launchers for Nuke, NukeX, and Nuke Studio? (y/n): " create_launcher
+if [ "$create_launcher" == "y" ]; then
+    mkdir -p ~/.local/share/applications
+
+    # Nuke
+    cat << EOF > ~/.local/share/applications/nuke.desktop
+[Desktop Entry]
+Name=Nuke
+Exec=$launch_nuke_path/nuke_launcher
+Icon=$nuke_path/Nuke${nuke_version}/plugins/icons/NukeApp48.png
+Type=Application
+Categories=Graphics;
+EOF
+
+    # NukeX
+    cat << EOF > ~/.local/share/applications/nukex.desktop
+[Desktop Entry]
+Name=NukeX
+Exec=$launch_nuke_path/nuke_launcher x
+Icon=$nuke_path/Nuke${nuke_version}/plugins/icons/NukeXApp48.png
+Type=Application
+Categories=Graphics;
+EOF
+
+    # Nuke Studio
+    cat << EOF > ~/.local/share/applications/nukestudio.desktop
+[Desktop Entry]
+Name=Nuke Studio
+Exec=$launch_nuke_path/nuke_launcher studio
+Icon=$nuke_path/Nuke${nuke_version}/plugins/icons/NukeStudioApp48.png
+Type=Application
+Categories=Graphics;
+EOF
+
+    echo "Application launchers created for Nuke, NukeX, and Nuke Studio. You should now see them in your applications menu."
+fi
+
+echo "Foundry Nuke installation completed!"

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Ask user if they want to install pcoip-client
+read -p "Do you want to install pcoip-client, if you need it for remote work? (y/n) " install_pcoip
+
+if [[ $install_pcoip =~ ^[Yy]$ ]]; then
+    echo "Installing pcoip-client..."
+    if ! rpm -q pcoip-client; then
+        curl -1sLf https://dl.anyware.hp.com/xHfmOLEc9bWcllgT/pcoip-agent/cfg/setup/bash.rpm.sh | sudo -E distro=el codename=9 bash
+        sudo dnf install pcoip-client
+    else
+        echo "pcoip-client is already installed on Rocky Linux"
+    fi
+else
+    echo "Skipping pcoip-client installation."
+fi

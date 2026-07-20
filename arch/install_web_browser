@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Ask user about browser installation
+echo "Which browser would you like to install?"
+echo "1. Thorium Browser (latest version)"
+echo "2. Google Chrome"
+echo "3. Firefox"
+echo "4. None"
+read -p "Enter your choice (1-4): " browser_choice
+
+case $browser_choice in
+    1)
+        echo "Installing latest version of Thorium Browser..."
+        yay -S thorium-browser-bin
+        ;;
+    2)
+        echo "Installing Google Chrome..."
+        yay -S google-chrome
+        ;;
+    3)
+        echo "Installing Firefox..."
+        sudo pacman -S --needed firefox
+        ;;
+    4)
+        echo "Skipping browser installation."
+        ;;
+    *)
+        echo "Invalid choice. Skipping browser installation."
+        ;;
+esac
+
+echo "Web browser installation completed."

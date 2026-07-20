@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Ask user if they want to install Mattermost Desktop
+read -p "Do you want to install Mattermost Desktop? (y/n): " install_choice
+
+if [[ $install_choice =~ ^[Yy]$ ]]; then
+    if ! dpkg -l | grep -q mattermost-desktop; then
+        curl -fsS -o- https://deb.packages.mattermost.com/setup-repo.sh | sudo bash
+        sudo apt update
+        sudo apt install mattermost-desktop
+    else
+        echo "mattermost-desktop is already installed"
+    fi
+else
+    echo "Installation cancelled."
+fi
+
+echo "Mattermost Desktop installation completed."

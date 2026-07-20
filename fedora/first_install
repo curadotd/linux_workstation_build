@@ -1,0 +1,98 @@
+#!/bin/bash
+
+# First install script for Fedora 44.
+# Installs development tools, graphics drivers and base utilities.
+# Note: Fedora uses dnf5, some config-manager commands differ from Rocky/RHEL.
+
+if [ ! -f /etc/fedora-release ]; then
+    echo "This script is for Fedora only. Use the folder matching your distribution."
+    exit 1
+fi
+
+# Install development tools and other necessary packages
+sudo dnf group install development-tools
+sudo dnf install gcc gcc-c++ kernel-devel kernel-headers tar tree \
+unzip cmake make jq dnf-plugins-core
+
+# Enable RPM Fusion free and nonfree, needed for NVIDIA drivers, Steam, full ffmpeg, etc.
+if ! rpm -q rpmfusion-free-release > /dev/null 2>&1; then
+    echo "Enabling RPM Fusion repositories..."
+    sudo dnf install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+    https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+fi
+
+echo "Fedora has a short release cycle, no unstable/testing repository switch is needed."
+
+# Ask user if they want to install graphics drivers
+read -p "Do you want to install graphics drivers? (y/n) " install_drivers
+if [[ $install_drivers =~ ^[Yy]$ ]]; then
+    if lspci | grep -i nvidia > /dev/null; then
+        echo "NVIDIA GPU detected."
+        echo "Which driver source do you want to use?"
+        echo "1) RPM Fusion akmod (recommended for desktop Fedora: rebuilt for every Fedora kernel update)"
+        echo "2) NVIDIA official CUDA repository (needed if you want NVIDIA's exact CUDA driver stack;"
+        echo "   note NVIDIA usually publishes it a while after each Fedora release, and kernel updates"
+        echo "   can outpace it)"
+        read -p "Enter your choice (1/2, default 1): " nvidia_source
+        nvidia_source=${nvidia_source:-1}
+
+        if [[ "$nvidia_source" == "2" ]]; then
+            echo "Installing NVIDIA drivers from the official NVIDIA repository..."
+            sudo dnf config-manager addrepo --from-repofile=https://developer.download.nvidia.com/compute/cuda/repos/fedora$(rpm -E %fedora)/x86_64/cuda-fedora$(rpm -E %fedora).repo || {
+                echo "NVIDIA does not publish a repository for Fedora $(rpm -E %fedora) yet."
+                echo "Falling back to RPM Fusion."
+                nvidia_source=1
+            }
+            if [[ "$nvidia_source" == "2" ]]; then
+                sudo dnf clean expire-cache
+                # Open kernel modules, recommended by NVIDIA for Turing and newer GPUs
+                sudo dnf install nvidia-open
+                sudo dnf install cuda-toolkit
+            fi
+        fi
+
+        if [[ "$nvidia_source" == "1" ]]; then
+            echo "Installing NVIDIA drivers from RPM Fusion..."
+            sudo dnf install akmod-nvidia xorg-x11-drv-nvidia-cuda xorg-x11-drv-nvidia-cuda-libs nvidia-vaapi-driver nvidia-settings
+
+            echo "Building the NVIDIA kernel module (this can take a few minutes)..."
+            sudo akmods --force
+        fi
+
+        echo "The initramfs and module options are handled automatically."
+        echo "Wait for the module build to finish before rebooting, check with: modinfo -F version nvidia"
+    elif lspci | grep -i amd > /dev/null; then
+        echo "AMD GPU detected. Installing AMD drivers..."
+        sudo dnf install mesa-vulkan-drivers mesa-va-drivers vulkan-tools
+        # Full VA-API/VDPAU acceleration comes from the RPM Fusion freeworld packages
+        sudo dnf swap mesa-va-drivers mesa-va-drivers-freeworld 2>/dev/null || true
+        sudo dnf swap mesa-vdpau-drivers mesa-vdpau-drivers-freeworld 2>/dev/null || true
+    elif lspci | grep -i intel > /dev/null; then
+        echo "Intel GPU detected. Installing Intel drivers..."
+        sudo dnf install intel-media-driver mesa-vulkan-drivers
+    else
+        echo "No supported GPU detected. Please check your hardware."
+    fi
+else
+    echo "Skipping graphics driver installation."
+fi
+
+# Clean up
+sudo dnf autoremove
+sudo dnf clean all
+
+# Check if video group exists and add user to it
+if getent group video > /dev/null 2>&1; then
+    sudo usermod -aG video $USER
+    echo "User added to video group."
+else
+    echo "Video group does not exist. Skipping."
+fi
+
+read -p "Do you want to reboot the system now? (y/n): " reboot_choice
+if [[ "$reboot_choice" == "y" ]]; then
+    echo "Rebooting the system..."
+    sudo reboot
+else
+    echo "Reboot skipped. Please reboot manually later."
+fi

@@ -1,0 +1,126 @@
+#!/bin/bash
+#
+# Install and setup Ollama on Arch Linux.
+# Supports CUDA (NVIDIA), Vulkan, and ROCm (AMD) via user options.
+#
+# Usage:
+#   ./install_ollama [OPTIONS]
+#
+# Options:
+#   --cuda        Install/setup NVIDIA driver and CUDA for Ollama (NVIDIA GPUs)
+#   --vulkan      Install Vulkan stack and set OLLAMA_VULKAN=1 (Intel/AMD/open drivers)
+#   --rocm        Prefer ROCm build (AMD GPUs; installs ollama-rocm)
+#   --no-service  Do not enable or start the ollama systemd service
+#   --skip-gpu    Do not install Vulkan/extra GPU packages
+#   -y, --yes     Non-interactive; assume yes for prompts
+#
+
+set -e
+
+# Options (defaults)
+OPT_CUDA=false
+OPT_VULKAN=false
+OPT_ROCM=false
+OPT_NO_SERVICE=false
+OPT_SKIP_GPU=false
+OPT_YES=false
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --cuda)      OPT_CUDA=true; shift ;;
+        --vulkan)    OPT_VULKAN=true; shift ;;
+        --rocm)      OPT_ROCM=true; shift ;;
+        --no-service) OPT_NO_SERVICE=true; shift ;;
+        --skip-gpu)  OPT_SKIP_GPU=true; shift ;;
+        -y|--yes)    OPT_YES=true; shift ;;
+        -h|--help)
+            head -16 "$0" | tail -11
+            exit 0
+            ;;
+        *) echo "Unknown option: $1"; exit 1 ;;
+    esac
+done
+
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+# Interactive choices when no GPU option given
+if ! $OPT_CUDA && ! $OPT_VULKAN && ! $OPT_ROCM && ! $OPT_SKIP_GPU; then
+    echo ""
+    echo "GPU acceleration (optional):"
+    echo "  1) None (CPU only)"
+    echo "  2) NVIDIA CUDA"
+    echo "  3) Vulkan (Intel Arc, older AMD, RADV)"
+    echo "  4) AMD ROCm"
+    echo ""
+    if $OPT_YES; then
+        choice="1"
+    else
+        read -p "Choice [1-4] (default 1): " choice
+        choice="${choice:-1}"
+    fi
+    case $choice in
+        2) OPT_CUDA=true ;;
+        3) OPT_VULKAN=true ;;
+        4) OPT_ROCM=true ;;
+        *) OPT_SKIP_GPU=true ;;
+    esac
+fi
+
+# Service setup
+setup_systemd() {
+    if $OPT_NO_SERVICE; then
+        echo "Skipping systemd service (--no-service). Run 'ollama serve' manually when needed."
+        return 0
+    fi
+    if id ollama &>/dev/null; then
+        sudo usermod -aG render ollama 2>/dev/null || true
+        sudo usermod -aG video ollama 2>/dev/null || true
+    fi
+    echo "Enabling and starting ollama service..."
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now ollama 2>/dev/null || sudo systemctl enable ollama
+    echo "Ollama service enabled. Check: systemctl status ollama"
+}
+
+# Set OLLAMA_VULKAN for all users (systemd service and shell)
+setup_vulkan_env() {
+    local env_file="/etc/environment"
+    if ! grep -q 'OLLAMA_VULKAN' "$env_file" 2>/dev/null; then
+        echo "Setting OLLAMA_VULKAN=1 in $env_file"
+        echo 'OLLAMA_VULKAN=1' | sudo tee -a "$env_file" >/dev/null
+    fi
+    export OLLAMA_VULKAN=1
+}
+
+echo "Installing Ollama on Arch Linux..."
+
+# Base and GPU variants: Arch splits ollama, ollama-cuda, ollama-rocm, ollama-vulkan
+if $OPT_SKIP_GPU; then
+    sudo pacman -S --needed ollama
+elif $OPT_CUDA; then
+    sudo pacman -S --needed nvidia-open nvidia-utils 2>/dev/null || true
+    sudo pacman -S --needed ollama ollama-cuda
+elif $OPT_ROCM; then
+    sudo pacman -S --needed ollama ollama-rocm
+elif $OPT_VULKAN; then
+    sudo pacman -S --needed vulkan-icd-loader mesa vulkan-radeon vulkan-intel 2>/dev/null || true
+    sudo pacman -S --needed ollama ollama-vulkan 2>/dev/null || sudo pacman -S --needed ollama
+else
+    sudo pacman -S --needed ollama
+fi
+
+if $OPT_VULKAN; then
+    setup_vulkan_env
+fi
+
+setup_systemd
+
+echo ""
+echo "Ollama install complete. Run 'ollama run <model>' to use a model."
+echo "API: http://127.0.0.1:11434"
+if $OPT_VULKAN; then
+    echo "Vulkan acceleration is enabled (OLLAMA_VULKAN=1)."
+fi

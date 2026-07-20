@@ -1,0 +1,18 @@
+#!/bin/bash
+
+echo "Do you want to install the Plasma desktop environment? (y/n)"
+read -r install_plasma
+
+if [[ $install_plasma =~ ^[Yy]$ ]]; then
+    # KDE Plasma comes from EPEL on Rocky Linux
+    sudo dnf install epel-release
+    sudo dnf config-manager --set-enabled crb
+
+    sudo dnf group install "KDE Plasma Workspaces" || sudo dnf install plasma-desktop sddm
+
+    sudo systemctl set-default graphical.target
+
+    echo "Plasma desktop environment has been installed. Please reboot your system to apply changes."
+else
+    echo "Plasma desktop installation skipped."
+fi

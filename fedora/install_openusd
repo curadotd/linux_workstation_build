@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Install dependencies
+sudo dnf group install development-tools
+sudo dnf install cmake git python3 python3-pip doxygen python3-pyopengl libXt-devel ncurses-compat-libs
+export PIP_BREAK_SYSTEM_PACKAGES=1
+pip install PySide6 PyOpenGL
+
+# Clone and build OpenUSD
+git clone https://github.com/PixarAnimationStudios/OpenUSD.git
+cd OpenUSD
+python3 build_scripts/build_usd.py --ptex \
+--openvdb --prman --prman-location /mnt/repository/software/install/linux/pixar/RenderManProServer-25.2 \
+--openimageio --opencolorio  --alembic --hdf5 --materialx /mnt/repository/software/install/linux/pixar/OpenUSD
+
+echo "OpenUSD installation completed."

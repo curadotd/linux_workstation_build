@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Ask user if they want to install Steam
+read -p "Do you want to install Steam? (y/n): " steam_answer
+if [[ $steam_answer == [Yy]* ]]; then
+    echo "Installing Steam..."
+
+    # Steam lives in RPM Fusion nonfree, wine in EPEL
+    sudo dnf install epel-release
+    sudo dnf install https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm \
+    https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-$(rpm -E %rhel).noarch.rpm
+    sudo dnf install steam wine
+
+    echo "Steam installation completed."
+else
+    echo "Steam installation skipped."
+fi
+
+echo "Steam installation process finished."

@@ -1,0 +1,71 @@
+#!/bin/bash
+
+# Function to install dependencies for Fedora
+install_fedora_dependencies() {
+    sudo dnf install fakeroot xorriso libxcb libXinerama libXcursor apr apr-util \
+    mesa-libGLU libxcrypt-compat zlib
+}
+
+# Function to install graphics drivers and dependencies for Fedora
+install_fedora_graphics() {
+    local gpu_type=$1
+
+    case $gpu_type in
+        nvidia)
+            # The NVIDIA driver and CUDA come from RPM Fusion, see first_install.
+            echo "Make sure akmod-nvidia and xorg-x11-drv-nvidia-cuda are installed (see first_install)."
+            ;;
+        amd)
+            sudo dnf install rocm-opencl
+            ;;
+        intel)
+            sudo dnf install intel-compute-runtime
+            ;;
+        *)
+            echo "Unsupported GPU type. Please install graphics drivers manually."
+            ;;
+    esac
+}
+
+# Ask user if they want to install DaVinci Resolve
+read -p "Do you want to install DaVinci Resolve for Linux? (y/n): " install_resolve
+
+if [[ $install_resolve =~ ^[Yy]$ ]]; then
+    echo "Fedora detected. Installing dependencies..."
+    install_fedora_dependencies
+    echo "Please select your GPU type (nvidia/amd/intel):"
+    read gpu_type
+    install_fedora_graphics $gpu_type
+
+    echo "Please download DaVinci Resolve from https://www.blackmagicdesign.com/products/davinciresolve"
+    echo "Save the file in your $HOME/Downloads directory."
+    read -p "Press Enter when you have completed the download."
+
+    read -p "Enter the name of the downloaded file: " resolve_file
+
+    if [ ! -f "$HOME/Downloads/$resolve_file" ]; then
+        echo "File not found. Please make sure you entered the correct filename."
+        exit 1
+    fi
+
+    echo "Extracting the installer..."
+    cd "$HOME/Downloads"
+    unzip "$resolve_file"
+
+    run_file=$(find . -name "*.run" -type f)
+    if [ -z "$run_file" ]; then
+        echo "Could not find the .run file. Installation failed."
+        exit 1
+    fi
+
+    echo "Running the installer..."
+    chmod +x "$run_file"
+    sudo SKIP_PACKAGE_CHECK=1 ./$run_file
+
+    echo "Using the system glib/gio libraries instead of the bundled ones..."
+    sudo rm -Rf /opt/resolve/libs/libglib-2.0.so* /opt/resolve/libs/libgio-2.0.so* /opt/resolve/libs/libgmodule-2.0.so*
+
+    echo "DaVinci Resolve installation completed."
+else
+    echo "Skipping DaVinci Resolve installation."
+fi

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+echo "Do you want to install the MATE desktop environment? (y/n)"
+read -r install_mate
+
+if [[ $install_mate =~ ^[Yy]$ ]]; then
+    sudo dnf group install mate-desktop-environment
+
+    sudo systemctl set-default graphical.target
+
+    echo "MATE desktop environment has been installed. Please reboot your system to apply changes."
+else
+    echo "MATE desktop installation skipped."
+fi

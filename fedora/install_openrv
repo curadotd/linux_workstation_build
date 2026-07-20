@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Ask user if they want to compile and install OpenRV
+read -p "Do you want to compile and install OpenRV? (y/n) " install_openrv
+
+current_dir=$(pwd)
+
+if [[ $install_openrv =~ ^[Yy]$ ]]; then
+
+    #Add some envs
+    export PIP_BREAK_SYSTEM_PACKAGES=1
+    read -p "Please enter the path where you have installed Qt (e.g., /mnt/repository/software/install/linux/Qt/5.15.2/gcc_64): " qt_home
+    export QT_HOME="$qt_home"
+    read -p "Please enter the installation path for OpenRV (e.g., /mnt/repository/software/install/linux/ASF/rv): " rv_inst
+    export RV_INST="$rv_inst"
+
+    # Install dependencies
+    sudo dnf group install development-tools
+    sudo dnf install cmake git python3 python3-pip qt5-qtbase-devel
+    sudo dnf install alsa-lib-devel autoconf automake avahi-compat-libdns_sd-devel bison bzip2-devel \
+    curl-devel flex gcc gcc-c++ libXcomposite libXi-devel libaio-devel libffi-devel nasm \
+    ncurses-devel nss libtool libxkbcommon libXdamage libXrandr libXtst libXcursor \
+    mesa-libOSMesa mesa-libOSMesa-devel meson ninja-build openssl-devel patch perl-FindBin \
+    pulseaudio-libs pulseaudio-libs-glib2 ocl-icd ocl-icd-devel opencl-headers python3-devel \
+    readline-devel sqlite-devel tcl-devel tcsh tk-devel yasm zip zlib-devel pre-commit \
+    mesa-libGLU mesa-libGLU-devel
+
+    # Clone the OpenRV repository
+    git clone --recursive https://github.com/AcademySoftwareFoundation/OpenRV.git
+    cd OpenRV || exit
+
+    # Bootstrap, build, and install OpenRV
+    pre-commit install
+    python3 -m pip install -r requirements.txt
+
+    source rvcmds.sh
+    rvsetup
+    rvcfg -DRV_FFMPEG_NON_FREE_DECODERS_TO_ENABLE="aac;hevc" -DRV_FFMPEG_NON_FREE_ENCODERS_TO_ENABLE="aac"
+
+    echo "OpenRV installation completed."
+else
+    echo "Skipping OpenRV compile and install"
+fi

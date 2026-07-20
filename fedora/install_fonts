@@ -1,0 +1,41 @@
+#!/bin/bash
+
+FONTS_HOME=$HOME/.local/share/fonts
+if [ ! -d "$FONTS_HOME" ]; then
+    mkdir -p "$FONTS_HOME"
+fi
+
+current_dir=$(pwd)
+
+install_fonts_manual() {
+    cd ~/Downloads
+    # Check if FiraCode Nerd Font is installed
+    if [ ! -f "$FONTS_HOME/FiraCodeNerdFont-Regular.ttf" ]; then
+        wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FiraCode.zip
+        unzip FiraCode.zip -d $FONTS_HOME
+        rm FiraCode.zip
+    else
+        echo "FiraCode Nerd Font is already installed"
+    fi
+
+    # Check if Meslo is installed
+    if [ ! -f "$FONTS_HOME/MesloLGLDZNerdFont-Bold.ttf" ]; then
+        wget https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.zip
+        unzip Meslo.zip -d $FONTS_HOME
+        rm Meslo.zip
+    else
+        echo "Meslo is already installed"
+    fi
+    cd "$current_dir"
+}
+
+read -p "Do you want to install fonts? (y/n): " install_fonts
+
+if [[ $install_fonts =~ ^[Yy]$ ]]; then
+    sudo dnf install fira-code-fonts fontawesome-fonts rsms-inter-fonts
+    install_fonts_manual
+    fc-cache -vf
+    echo "Font installation completed."
+else
+    echo "Font installation skipped."
+fi

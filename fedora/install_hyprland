@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Hyprland and most of its ecosystem are packaged in the official Fedora repositories.
+
+echo "Installing Hyprland and SDDM on Fedora..."
+sudo dnf install hyprland hyprlock hypridle hyprpicker hyprpaper xdg-desktop-portal-hyprland \
+waybar dunst qt5ct qt6ct qt5-qtwayland qt6-qtwayland pavucontrol wl-clipboard cliphist \
+grim slurp sddm rofi-wayland blueman pamixer playerctl jq kitty dolphin nwg-look
+
+echo "Hyprland and SDDM installation completed."

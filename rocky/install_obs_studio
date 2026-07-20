@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "Do you want to install OBS Studio? (y/n)"
+read -r response
+
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    echo "Installing OBS Studio..."
+    # OBS Studio and full ffmpeg come from EPEL and RPM Fusion
+    sudo dnf install epel-release
+    sudo dnf install https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-$(rpm -E %rhel).noarch.rpm
+    sudo dnf install obs-studio ffmpeg
+    echo "OBS Studio installation complete."
+else
+    echo "OBS Studio installation skipped."
+fi

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "Do you want to install the Plasma desktop environment? (y/n)"
+read -r install_plasma
+
+if [[ $install_plasma =~ ^[Yy]$ ]]; then
+    sudo apt update
+    sudo apt install task-plasma-desktop
+
+    echo "Plasma desktop environment has been installed. Please reboot your system to apply changes."
+else
+    echo "Plasma desktop installation skipped."
+fi

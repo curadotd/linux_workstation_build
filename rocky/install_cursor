@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Ask for user confirmation
+echo "This script will install the latest version of Cursor, you will need to download the AppImage file from https://www.cursor.com/download"
+read -p "Do you want to proceed? (y/n): " confirm
+
+if [[ $confirm != [yY] && $confirm != [yY][eE][sS] ]]; then
+    echo "Installation cancelled."
+    exit 0
+fi
+
+echo "Please download Cursor from https://www.cursor.com/download"
+echo "Once you've downloaded the file, place it in your $HOME/Downloads folder."
+read -p "Press Enter when you've completed this step..."
+
+# Find the Cursor AppImage file
+cursor_file=$(find "$HOME/Downloads" -name "*[Cc]ursor*.AppImage" -type f -print -quit)
+
+if [ -z "$cursor_file" ]; then
+    echo "Cursor AppImage not found in $HOME/Downloads folder."
+    echo "Please make sure you've downloaded the file. It should be named like 'Cursor-<version>-x86_64.AppImage'."
+    exit 1
+fi
+
+# Make the AppImage executable
+chmod +x "$cursor_file"
+
+# Move the AppImage to a suitable location
+sudo mv "$cursor_file" /opt/cursor.AppImage
+
+echo "Cursor has been successfully downloaded and made executable!"
+
+# Create a desktop entry
+mkdir -p ~/.local/share/applications
+cat << EOF > ~/.local/share/applications/cursor.desktop
+[Desktop Entry]
+Name=Cursor
+Exec=/opt/cursor.AppImage
+Icon=cursor
+Type=Application
+Categories=Development;
+EOF
+
+echo "A desktop entry has been created for Cursor."
+echo "Cursor has been successfully installed!"
+echo "You can now launch Cursor from your application menu, or by running /opt/cursor.AppImage."

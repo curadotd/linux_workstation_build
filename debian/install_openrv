@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Ask user if they want to compile and install OpenRV
+read -p "Do you want to compile and install OpenRV? (y/n) " install_openrv
+
+current_dir=$(pwd)
+
+if [[ $install_openrv =~ ^[Yy]$ ]]; then
+
+    #Add some envs
+    export PIP_BREAK_SYSTEM_PACKAGES=1
+    read -p "Please enter the path where you have installed Qt (e.g., /mnt/repository/software/install/linux/Qt/5.15.2/gcc_64): " qt_home
+    export QT_HOME="$qt_home"
+    read -p "Please enter the installation path for OpenRV (e.g., /mnt/repository/software/install/linux/ASF/rv): " rv_inst
+    export RV_INST="$rv_inst"
+
+    # Install dependencies
+    # Note: qt5-default no longer exists on current Debian, qtbase5-dev is used instead.
+    sudo apt update
+    sudo apt install build-essential cmake git python3 python3-pip qtbase5-dev qttools5-dev pre-commit \
+    libasound2-dev autoconf automake libavahi-compat-libdnssd-dev bison flex libbz2-dev curl libcurl4-openssl-dev \
+    nasm libncurses-dev libnss3-dev libtool libxcomposite-dev libxi-dev libaio-dev libffi-dev \
+    libxkbcommon-dev libxdamage-dev libxrandr-dev libxtst-dev libxcursor-dev meson ninja-build \
+    libssl-dev patch ocl-icd-opencl-dev opencl-headers python3-dev libreadline-dev libsqlite3-dev \
+    tcl-dev tcsh tk-dev yasm zip zlib1g-dev libglu1-mesa-dev
+
+    # Clone the OpenRV repository
+    git clone --recursive https://github.com/AcademySoftwareFoundation/OpenRV.git
+    cd OpenRV || exit
+
+    # Bootstrap, build, and install OpenRV
+    pre-commit install
+    python3 -m pip install -r requirements.txt
+
+    source rvcmds.sh
+    rvsetup
+    rvcfg -DRV_FFMPEG_NON_FREE_DECODERS_TO_ENABLE="aac;hevc" -DRV_FFMPEG_NON_FREE_ENCODERS_TO_ENABLE="aac"
+
+    echo "OpenRV installation completed."
+else
+    echo "Skipping OpenRV compile and install"
+fi

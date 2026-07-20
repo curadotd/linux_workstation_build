@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Function to get the latest release URL for a given file type
+get_latest_release_url() {
+    local file_type=$1
+    curl -s https://api.github.com/repos/mattermost/desktop/releases/latest | grep "browser_download_url.*${file_type}" | cut -d '"' -f 4
+}
+
+# Ask user if they want to install Mattermost Desktop
+read -p "Do you want to install Mattermost Desktop? (y/n): " install_choice
+
+if [[ $install_choice =~ ^[Yy]$ ]]; then
+    if ! rpm -q mattermost-desktop; then
+        url=$(get_latest_release_url "linux-x86_64.rpm")
+        wget $url
+        sudo dnf install mattermost-desktop-*-linux-x86_64.rpm
+        rm mattermost-desktop-*-linux-x86_64.rpm
+    else
+        echo "mattermost-desktop is already installed"
+    fi
+else
+    echo "Installation cancelled."
+fi
+
+echo "Mattermost Desktop installation completed."

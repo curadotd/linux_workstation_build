@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Install dependencies
+sudo pacman -S --needed base-devel cmake git python python-pip python-opengl pyside6 pyside6-tools python-distutils-extra
+if command -v yay &> /dev/null; then
+    yay -S --needed pyside6-tools-wrappers
+fi
+
+# Clone and build OpenUSD
+git clone https://github.com/PixarAnimationStudios/OpenUSD.git
+cd OpenUSD
+python build_scripts/build_usd.py --ptex \
+--openvdb --prman --prman-location /mnt/repository/software/install/linux/pixar/RenderManProServer-25.2 \
+--openimageio --opencolorio  --alembic --hdf5 --materialx /mnt/repository/software/install/linux/pixar/OpenUSD
+
+echo "OpenUSD installation completed."

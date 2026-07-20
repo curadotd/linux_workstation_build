@@ -1,0 +1,20 @@
+#!/bin/bash
+
+FONTS_HOME=$HOME/.local/share/fonts
+if [ ! -d "$FONTS_HOME" ]; then
+    mkdir -p "$FONTS_HOME"
+fi
+
+read -p "Do you want to install fonts? (y/n): " install_fonts
+
+if [[ $install_fonts =~ ^[Yy]$ ]]; then
+    sudo pacman -S --needed ttf-fira-code ttf-firacode-nerd ttf-meslo-nerd ttf-font-awesome otf-font-awesome inter-font
+
+    ./install_yay
+    yay -S --needed ttf-comfortaa ttf-icomoon-feather tela-icon-theme nordzy-icon-theme otf-sora
+
+    fc-cache -vf
+    echo "Font installation completed."
+else
+    echo "Font installation skipped."
+fi

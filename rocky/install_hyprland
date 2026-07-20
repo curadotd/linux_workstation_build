@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "Installing Hyprland and SDDM on Rocky Linux..."
+# The copr plugin is part of dnf-plugins-core, pamixer/playerctl come from EPEL
+sudo dnf install dnf-plugins-core epel-release
+sudo dnf copr enable solopasha/hyprland
+sudo dnf install hyprland sddm waybar
+
+# Ecosystem tools from the same COPR / EPEL; install what is available.
+for pkg in hyprpaper hyprlock hypridle hyprshot cliphist pamixer playerctl jq kitty rofi \
+wl-clipboard dunst pavucontrol grim slurp; do
+    sudo dnf install "$pkg" || echo "WARNING: $pkg is not available, install it manually if needed."
+done
+
+echo "Hyprland and SDDM installation completed."

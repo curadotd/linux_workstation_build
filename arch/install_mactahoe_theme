@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Install the macOS Tahoe GTK and icon themes (vinceliuice),
+# used by the dotconfig macOS Tahoe / liquid glass setup.
+
+current_dir=$(pwd)
+
+echo "Do you want to install the MacTahoe GTK and icon themes? (y/n)"
+read -r response
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    # Check if GIT_PATH is already set
+    if [ -z "$GIT_PATH" ]; then
+        read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+        GIT_PATH=${git_path:-$HOME/git}
+        export GIT_PATH
+
+        if [ ! -d "$GIT_PATH" ]; then
+            mkdir -p "$GIT_PATH"
+            echo "Created git directory at $GIT_PATH"
+        fi
+    else
+        echo "GIT_PATH is already set to $GIT_PATH"
+    fi
+
+    # Theme build/install dependencies
+    sudo pacman -S --needed gtk-engine-murrine gnome-themes-extra sassc
+
+    # GTK theme
+    if [ ! -d "$GIT_PATH/MacTahoe-gtk-theme" ]; then
+        git clone https://github.com/vinceliuice/MacTahoe-gtk-theme.git $GIT_PATH/MacTahoe-gtk-theme
+    fi
+    cd $GIT_PATH/MacTahoe-gtk-theme
+    # See the repo README for more variants and flags
+    ./install.sh -t default -c dark
+
+    # Icon theme (nord variant matches icon_theme = MacTahoe-nord-dark in dotconfig)
+    if [ ! -d "$GIT_PATH/MacTahoe-icon-theme" ]; then
+        git clone https://github.com/vinceliuice/MacTahoe-icon-theme.git $GIT_PATH/MacTahoe-icon-theme
+    fi
+    cd $GIT_PATH/MacTahoe-icon-theme
+    ./install.sh -t nord
+
+    cd $current_dir
+    echo "MacTahoe themes installed. Select them with nwg-look/lxappearance or via gsettings."
+else
+    echo "MacTahoe theme installation skipped."
+fi

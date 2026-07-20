@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Ask user if they want to install Mattermost Desktop
+read -p "Do you want to install Mattermost Desktop? (y/n): " install_choice
+
+if [[ $install_choice =~ ^[Yy]$ ]]; then
+    if ! pacman -Qi mattermost-desktop &> /dev/null; then
+        sudo pacman -S --needed mattermost-desktop
+    else
+        echo "mattermost-desktop is already installed"
+    fi
+else
+    echo "Installation cancelled."
+fi
+
+echo "Mattermost Desktop installation completed."

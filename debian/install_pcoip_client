@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Ask user if they want to install pcoip-client
+read -p "Do you want to install pcoip-client, if you need it for remote work? (y/n) " install_pcoip
+
+current_dir=$(pwd)
+
+if [[ $install_pcoip =~ ^[Yy]$ ]]; then
+    echo "Installing pcoip-client..."
+    if ! dpkg -l | grep -q pcoip-client; then
+        # HP Anyware does not publish a native Debian repository,
+        # the Ubuntu jammy repository is used instead.
+        curl -1sLf https://dl.anyware.hp.com/DeAdBCiUYInHcSTy/pcoip-client/cfg/setup/bash.deb.sh | sudo -E distro=ubuntu codename=jammy bash
+        sudo apt update
+        # The client still links against the older protobuf23 library
+        cd ~/Downloads
+        wget https://ftp.debian.org/debian/pool/main/p/protobuf/libprotobuf23_3.12.4-1+deb11u1_amd64.deb
+        sudo apt install ./libprotobuf23_3.12.4-1+deb11u1_amd64.deb
+        rm libprotobuf23_3.12.4-1+deb11u1_amd64.deb
+        cd "$current_dir"
+        sudo apt install pcoip-client
+        echo "pcoip-client has been installed successfully."
+    else
+        echo "pcoip-client is already installed on Debian"
+    fi
+else
+    echo "Skipping pcoip-client installation."
+fi

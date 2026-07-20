@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Ask user if they want to install Steam
+read -p "Do you want to install Steam? (y/n): " steam_answer
+if [[ $steam_answer == [Yy]* ]]; then
+    echo "Installing Steam..."
+
+    # Steam lives in RPM Fusion nonfree
+    if ! rpm -q rpmfusion-nonfree-release > /dev/null 2>&1; then
+        sudo dnf install https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+        https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+    fi
+    sudo dnf install steam wine mangohud gamemode
+
+    sudo usermod -aG gamemode $USER 2>/dev/null || true
+    # Create /etc/profile.d/gaming.sh if it doesn't exist
+    if [ ! -f /etc/profile.d/gaming.sh ]; then
+        echo "Creating /etc/profile.d/gaming.sh and setting MANGOHUD=1"
+        sudo bash -c 'echo "export MANGOHUD=1" > /etc/profile.d/gaming.sh'
+        sudo chmod 644 /etc/profile.d/gaming.sh
+    else
+        echo "/etc/profile.d/gaming.sh already exists. Skipping creation."
+    fi
+
+    echo "Steam installation completed."
+else
+    echo "Steam installation skipped."
+fi
+
+echo "Steam installation process finished."

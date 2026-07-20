@@ -1,0 +1,68 @@
+#!/bin/bash
+
+current_dir=$(pwd)
+
+# Ask user if they want to use Tokyo Nights theme files
+echo "Do you want to install Tokyo Nights theme? (y/n)?"
+read -r response
+if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    # Check if GIT_PATH is already set
+    if [ -z "$GIT_PATH" ]; then
+        read -p "Enter the path for git repositories (default: $HOME/git): " git_path
+        GIT_PATH=${git_path:-$HOME/git}
+        export GIT_PATH
+
+        if [ ! -d "$GIT_PATH" ]; then
+            mkdir -p "$GIT_PATH"
+            echo "Created git directory at $GIT_PATH"
+        else
+            echo "Git directory already exists at $GIT_PATH"
+        fi
+    else
+        echo "GIT_PATH is already set to $GIT_PATH"
+    fi
+
+    echo "Installing Tokyo Night theme..."
+
+    # Check if Tokyo-Night-Linux directory already exists
+    if [ ! -d "$GIT_PATH/Tokyo-Night-Linux" ]; then
+        git clone https://github.com/stronk-dev/Tokyo-Night-Linux.git $GIT_PATH/Tokyo-Night-Linux
+    else
+        echo "Tokyo-Night-Linux directory already exists. Skipping clone."
+    fi
+
+    cd $GIT_PATH/Tokyo-Night-Linux
+
+    # Check if the destination folder exists, if not create it
+    if [ ! -d "/usr/share/themes" ]; then
+        sudo mkdir -p /usr/share/themes
+        echo "Created /usr/share/themes directory"
+    fi
+
+    # Check if TokyoNight theme directory exists before copying
+    if [ ! -d "/usr/share/themes/TokyoNight" ]; then
+        sudo cp -R usr/share/themes/TokyoNight /usr/share/themes/
+        echo "Copied TokyoNight theme to /usr/share/themes/"
+    else
+        echo "TokyoNight theme directory already exists. Skipping copy."
+    fi
+
+    # Create qt5ct color scheme file if it doesn't exist
+    if [ ! -f "/usr/share/qt5ct/colors/tokyo.conf" ]; then
+        sudo mkdir -p /usr/share/qt5ct/colors
+        sudo tee /usr/share/qt5ct/colors/tokyo.conf > /dev/null << EOL
+[ColorScheme]
+active_colors=#7aa2f7, #24283b, #565f89, #c0caf5, #414868, #414868, #c0caf5, #414868, #7aa2f7, #1a1b26, #1a1b26, #414868, #343b58, #7aa2f7, #9ece6a, #9ece6a, #414868, #343b58, #414868, #565a6e, #414868
+disabled_colors=#7aa2f7, #24283b, #565f89, #c0caf5, #414868, #414868, #c0caf5, #414868, #7aa2f7, #1a1b26, #1a1b26, #414868, #c0caf5, #7aa2f7, #9ece6a, #9ece6a, #414868, #c0caf5, #414868, #565a6e, #414868
+inactive_colors=#7aa2f7, #24283b, #565f89, #c0caf5, #414868, #414868, #c0caf5, #414868, #7aa2f7, #1a1b26, #1a1b26, #414868, #c0caf5, #7aa2f7, #9ece6a, #9ece6a, #414868, #c0caf5, #414868, #565a6e, #414868
+EOL
+    else
+        echo "qt5ct color scheme file already exists. Skipping creation."
+    fi
+
+    echo "Tokyo Night theme and qt color scheme installed. Please follow the theme's documentation for activation."
+    cd $current_dir
+    echo "Script execution completed."
+else
+    echo "Tokyo Night theme installation skipped."
+fi

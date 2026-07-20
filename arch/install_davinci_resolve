@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Ask user if they want to install DaVinci Resolve
+read -p "Do you want to install DaVinci Resolve for Linux? (y/n): " install_resolve
+
+if [[ $install_resolve =~ ^[Yy]$ ]]; then
+    echo "Arch Linux detected. Using yay to install DaVinci Resolve..."
+
+    if ! command -v yay &> /dev/null; then
+        read -p "yay is not installed. Do you want to install it? (y/n): " install_yay
+        if [[ $install_yay =~ ^[Yy]$ ]]; then
+            ./install_yay
+        else
+            echo "yay is required to install DaVinci Resolve on Arch Linux. Exiting."
+            exit 1
+        fi
+    fi
+
+    read -p "Do you want to install DaVinci Resolve (free) or DaVinci Resolve Studio? (free/studio): " resolve_version
+    if [[ $resolve_version == "studio" ]]; then
+        yay -S davinci-resolve-studio log4cxx --needed
+        sudo chown -R $USER: /opt/resolve/.license
+    else
+        yay -S davinci-resolve log4cxx --needed
+    fi
+
+    # Use the system glib libraries instead of the bundled ones
+    sudo rm -Rf /opt/resolve/libs/libglib-2.0.so* /opt/resolve/libs/libgio-2.0.so* /opt/resolve/libs/libgmodule-2.0.so*
+
+    echo "DaVinci Resolve installation completed."
+else
+    echo "Skipping DaVinci Resolve installation."
+fi
