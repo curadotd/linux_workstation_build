@@ -6,7 +6,7 @@
 echo "Installing Hyprland and SDDM on Debian..."
 sudo apt update
 sudo apt install hyprland xdg-desktop-portal-hyprland xwayland waybar sddm qt6ct \
-wl-clipboard dunst pavucontrol rofi grim slurp pamixer playerctl jq kitty
+wl-clipboard dunst pavucontrol rofi grim slurp pamixer playerctl jq kitty nwg-look
 
 # Newer Hyprland ecosystem tools; not all of them are packaged in every
 # Debian release, install what is available and warn about the rest.

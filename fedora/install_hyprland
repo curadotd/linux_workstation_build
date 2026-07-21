@@ -166,6 +166,23 @@ if [ ! -d "$BUILD_DIR/Hyprshot" ]; then
 fi
 sudo install -m 755 "$BUILD_DIR/Hyprshot/hyprshot" /usr/local/bin/hyprshot
 
+# nwg-look (GTK appearance settings editor, needed since Fedora has no
+# import-gsettings equivalent under Hyprland) is not packaged for Fedora, so
+# it is built from source. Its Go module deps are fetched by "go build"
+# itself - on top of the libraries already installed above (glib2-devel,
+# cairo-devel, pango-devel), only the Go toolchain and GTK3 headers were
+# missing.
+sudo dnf install golang gtk3-devel
+if [ ! -d "$BUILD_DIR/nwg-look" ]; then
+    git clone https://github.com/nwg-piotr/nwg-look "$BUILD_DIR/nwg-look"
+fi
+(
+    cd "$BUILD_DIR/nwg-look"
+    git pull
+    make build
+    sudo make install
+) || echo "WARNING: nwg-look build failed, GTK theme/icon/cursor settings will need to be set by hand (e.g. via gsettings or ~/.config/gtk-3.0/settings.ini)."
+
 echo ""
 echo "Hyprland stack built and installed from source (sources kept in $BUILD_DIR)."
 echo "To update later: bump HYPRLAND_VERSION in this script, git pull the tool repos, and re-run."

@@ -175,6 +175,21 @@ if [ ! -d "$BUILD_DIR/Hyprshot" ]; then
 fi
 sudo install -m 755 "$BUILD_DIR/Hyprshot/hyprshot" /usr/local/bin/hyprshot
 
+# nwg-look (GTK appearance settings editor) is not packaged for EL9 either,
+# so it is built from source the same way as on Fedora. "golang" comes from
+# EPEL on EL9; gtk3-devel and its headers are pulled in via the libraries
+# already installed above.
+sudo dnf install golang gtk3-devel || echo "WARNING: golang/gtk3-devel not found, enable EPEL/CRB (done above) or install manually before building nwg-look."
+if [ ! -d "$BUILD_DIR/nwg-look" ]; then
+    git clone https://github.com/nwg-piotr/nwg-look "$BUILD_DIR/nwg-look"
+fi
+(
+    cd "$BUILD_DIR/nwg-look"
+    git pull
+    make build
+    sudo make install
+) || echo "WARNING: nwg-look build failed, GTK theme/icon/cursor settings will need to be set by hand (e.g. via gsettings or ~/.config/gtk-3.0/settings.ini)."
+
 echo ""
 echo "Hyprland stack built and installed from source (sources kept in $BUILD_DIR)."
 echo "To update later: git pull in each directory and re-run this script."
