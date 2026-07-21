@@ -17,6 +17,7 @@ fi
 sudo apt install cmake meson cpio git g++ pkg-config
 sudo apt install hyprland-dev || echo "WARNING: hyprland-dev not available, hyprpm may fail to build plugins."
 
+# First run creates /var/cache/hyprpm and may prompt for your password
 hyprpm update
 hyprpm add https://github.com/hyprnux/hyprglass || true
 hyprpm add https://github.com/KZDKM/Hyprspace || true
@@ -25,5 +26,5 @@ hyprpm enable Hyprspace
 hyprpm reload
 
 echo "Plugins installed and enabled."
-echo "To load them at startup, hyprland.conf runs 'exec-once = hyprpm reload -n'."
+echo "To load them at startup, hyprland.conf runs 'hyprpm reload' once /var/cache/hyprpm exists."
 echo "For the Hyprspace overview, uncomment the SUPER+TAB bind in hypr/imports/keybindings.conf."

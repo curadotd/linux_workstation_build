@@ -14,6 +14,7 @@ if [[ ! $install_plugins =~ ^[Yy]$ ]]; then
 fi
 
 # Build dependencies for hyprpm
+# First run creates /var/cache/hyprpm and may prompt for your password
 sudo pacman -S --needed cmake meson cpio git gcc pkgconf
 
 hyprpm update
@@ -24,5 +25,5 @@ hyprpm enable Hyprspace
 hyprpm reload
 
 echo "Plugins installed and enabled."
-echo "To load them at startup, hyprland.conf runs 'exec-once = hyprpm reload -n'."
+echo "To load them at startup, hyprland.conf runs 'hyprpm reload' once /var/cache/hyprpm exists."
 echo "For the Hyprspace overview, uncomment the SUPER+TAB bind in hypr/imports/keybindings.conf."

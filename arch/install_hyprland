@@ -8,7 +8,7 @@ echo "Installing Hyprland and other packages on Arch Linux..."
 sudo pacman -S --needed hyprland xdg-desktop-portal-hyprland xorg-xwayland qt5-wayland qt6-wayland qt5ct qt6ct libva \
 nwg-look jq gtk3 gtk4 xdg-desktop-portal dunst dolphin pamixer xdg-desktop-portal-gtk \
 xorg-xhost i2c-tools pavucontrol wl-clipboard hyprshot hyprpaper playerctl rofi \
-waybar blueman cliphist shotwell wlr-randr hyprlock hypridle hyprpolkitagent hyprtoolkit hyprlauncher
+waybar blueman cliphist shotwell wlr-randr hyprlock hypridle hyprpolkitagent hyprtoolkit hyprlauncher hyprland-guiutils
 
 ./install_yay
 

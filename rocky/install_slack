@@ -21,6 +21,15 @@ if [[ $install_choice =~ ^[Yy]$ ]]; then
 
     sudo dnf install "$ACTUAL_FILE"
 
+    # Slack's rpm auto-adds /etc/yum.repos.d/slack.repo (packagecloud.io, Slack's own
+    # vendor repo) hardcoding sslcacert=/etc/pki/tls/certs/ca-bundle.crt - a legacy path
+    # that may not be populated on this system (ca-certificates only ships
+    # /etc/ssl/certs/ca-bundle.crt and the ca-trust-extracted bundles), which makes dnf
+    # fail with a curl SSL error refreshing that repo. Recreate the compatibility symlink.
+    if [ ! -e /etc/pki/tls/certs/ca-bundle.crt ] && [ -f /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem ]; then
+        sudo ln -sf /etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem /etc/pki/tls/certs/ca-bundle.crt
+    fi
+
     echo "Slack installation completed."
 else
     echo "Slack installation skipped."

@@ -15,4 +15,7 @@ for pkg in hyprpaper hyprlock hypridle cliphist; do
 done
 
 echo "Note: hyprshot is not packaged on Debian, grim+slurp are installed as the screenshot fallback."
+echo "Note: hyprland-guiutils (used by a few Hyprland dialogs, non-critical) is only in"
+echo "trixie-backports, not trixie main. Enable backports yourself if you want it:"
+echo "  https://backports.debian.org/Instructions/"
 echo "Hyprland and SDDM installation completed."

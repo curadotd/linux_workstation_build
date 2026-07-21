@@ -47,11 +47,55 @@ if [[ $install_choice =~ ^[Yy]$ ]]; then
     cd /
     rm -rf "$tmp_dir"
 
+    # Parsec's own AUR package (parsec-bin) pins a hard dependency on
+    # ffmpeg4.4, not "ffmpeg". Its parsecd binary dlopens libavcodec by a
+    # bare soname (whatever it finds), and on Fedora/EL that resolves to the
+    # current system ffmpeg (8.x, libavcodec.so.62) instead - which loads
+    # fine but is ABI-incompatible with what parsecd was actually built
+    # against, causing every stream to fail with "decode_frame = -17" and
+    # an empty decoder list, with no visible error anywhere. Confirmed by
+    # building the official ffmpeg n4.4 release (matching the AUR pin)
+    # into a private prefix and pointing ONLY parsecd at it via
+    # LD_LIBRARY_PATH in the wrapper below - the system-wide ffmpeg 8.x
+    # used by everything else on the machine is untouched.
+    FFMPEG44_PREFIX="/opt/parsec-ffmpeg4.4"
+    if [ ! -f "$FFMPEG44_PREFIX/lib/libavcodec.so.58" ]; then
+        echo "Building ffmpeg 4.4 (Parsec's required ABI) from the official FFmpeg source..."
+        sudo dnf install nasm gcc make git pkgconf-pkg-config
+        tmp_ffmpeg=$(mktemp -d)
+        git clone --depth 1 --branch n4.4 https://github.com/FFmpeg/FFmpeg.git "$tmp_ffmpeg"
+        cd "$tmp_ffmpeg" || exit 1
+        # --disable-inline-asm: ffmpeg 4.4's GCC-style inline asm in
+        # mathops.h fails to assemble on Fedora 44's newer binutils
+        # ("operand type mismatch for `shr`"). The separately-assembled
+        # NASM SIMD codecs (the actual decode hot path) are unaffected.
+        ./configure --prefix="$tmp_ffmpeg/install" --enable-shared --disable-static \
+        --disable-doc --disable-programs --disable-vaapi --disable-vdpau --disable-inline-asm
+        make -j"$(nproc)"
+        make install
+        sudo mkdir -p "$FFMPEG44_PREFIX"
+        sudo cp -P "$tmp_ffmpeg"/install/lib/*.so* "$FFMPEG44_PREFIX/"
+        cd /
+        rm -rf "$tmp_ffmpeg"
+    else
+        echo "ffmpeg 4.4 already built for Parsec, skipping."
+    fi
+
+    # Wrapper so the desktop entry / any launcher (rofi, SUPER+A, etc.)
+    # picks up the private ffmpeg 4.4 automatically
+    sudo mv /usr/bin/parsecd /usr/bin/parsecd.real
+    sudo tee /usr/bin/parsecd > /dev/null << EOF
+#!/bin/bash
+export LD_LIBRARY_PATH="$FFMPEG44_PREFIX\${LD_LIBRARY_PATH:+:\$LD_LIBRARY_PATH}"
+exec /usr/bin/parsecd.real "\$@"
+EOF
+    sudo chmod 755 /usr/bin/parsecd
+
     # Sanity check
-    if command -v parsecd > /dev/null && ! ldd /usr/bin/parsecd | grep -q "not found"; then
+    if command -v parsecd > /dev/null && ! ldd /usr/bin/parsecd.real | grep -q "not found"; then
         echo "Parsec installation completed. Launch with: parsecd"
     else
-        echo "WARNING: parsecd installed but some libraries did not resolve, run: ldd /usr/bin/parsecd"
+        echo "WARNING: parsecd installed but some libraries did not resolve, run: ldd /usr/bin/parsecd.real"
     fi
 else
     echo "Parsec installation skipped."
