@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Claude Desktop is officially supported by Anthropic only on Debian/Ubuntu
+# (https://code.claude.com/docs/en/desktop-linux) - there is no RPM. The
+# official .deb is extracted directly, same approach as install_parsec.
+# Dependency names below are the Fedora equivalents of the .deb's own
+# "Depends:"/"Recommends:" list, verified against packages.fedoraproject.org.
+
+read -p "Do you want to install Claude Desktop? (y/n): " install_choice
+
+if [[ $install_choice =~ ^[Yy]$ ]]; then
+    echo "Installing runtime dependencies from the official Fedora repos..."
+    sudo dnf install gtk3 libnotify nss xdg-utils at-spi2-core libdrm mesa-libgbm \
+    libxcb libsecret libXtst xdg-desktop-portal xdg-desktop-portal-gtk trash-cli \
+    alsa-lib ca-certificates gnome-keyring
+
+    # Fedora has no libayatana-appindicator3/libappindicator3 (GTK3) package,
+    # only a GTK2 build - the app's tray icon may not appear as a result.
+    echo "Note: Fedora has no GTK3 appindicator library, the tray icon may not show."
+
+    # "Cowork" (Anthropic's VM-sandboxed session feature) needs a local QEMU VM.
+    # Skip this unless you plan to use that feature - it is a large, heavy install.
+    read -p "Do you want Cowork support (installs qemu-system-x86, ~large download)? (y/n): " cowork_choice
+    if [[ $cowork_choice =~ ^[Yy]$ ]]; then
+        sudo dnf install qemu-system-x86 edk2-ovmf virtiofsd
+    fi
+
+    echo "Downloading Claude Desktop from Anthropic's official apt repository..."
+    tmp_dir=$(mktemp -d)
+    cd "$tmp_dir" || exit 1
+    deb_path=$(curl -s "https://downloads.claude.ai/claude-desktop/apt/stable/dists/stable/main/binary-amd64/Packages" \
+    | grep '^Filename: pool/main/c/claude-desktop/claude-desktop_' | sort -V | tail -n 1 | cut -d' ' -f2)
+    if [ -z "$deb_path" ]; then
+        echo "Could not find the package in Anthropic's repository index. Aborting."
+        exit 1
+    fi
+    curl -fLO "https://downloads.claude.ai/claude-desktop/apt/stable/$deb_path"
+    ar x claude-desktop_*.deb
+    tar xf data.tar.*
+
+    sudo cp -r usr/* /usr/
+
+    # tar extraction as a regular user cannot preserve root ownership or the
+    # setuid bit that chrome-sandbox ships with - Chromium's sandbox needs
+    # both to actually work, so they are reapplied explicitly here.
+    sudo chown root:root /usr/lib/claude-desktop/chrome-sandbox
+    sudo chmod 4755 /usr/lib/claude-desktop/chrome-sandbox
+
+    cd /
+    rm -rf "$tmp_dir"
+
+    # Sanity check
+    if command -v claude-desktop > /dev/null && ! ldd /usr/lib/claude-desktop/claude-desktop | grep -q "not found"; then
+        echo "Claude Desktop installation completed. Launch with: claude-desktop"
+    else
+        echo "WARNING: some libraries did not resolve, run: ldd /usr/lib/claude-desktop/claude-desktop"
+    fi
+else
+    echo "Claude Desktop installation skipped."
+fi
